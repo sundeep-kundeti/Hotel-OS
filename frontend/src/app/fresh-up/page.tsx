@@ -1,5 +1,5 @@
-import FreshUpBookingPage from '../../features/fresh-up/components/FreshUpBookingPage';
+import GuestFreshUpPage from '../../features/fresh-up/components/GuestFreshUpPage';
 
-export default function FreshUpRoute() {
-  return <FreshUpBookingPage />;
+export default function GuestFreshUpRoute() {
+  return <GuestFreshUpPage />;
 }
