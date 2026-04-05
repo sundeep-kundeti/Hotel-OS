@@ -81,12 +81,12 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
       let nextAvailableTime: string | undefined;
 
       const activeBooking = todaysBookings.find((b) => 
-         (nowHHMM >= b.startTime && nowHHMM <= b.endTime) || 
-         (b.status === 'checked_in')
+         b.status === 'checked_in' || 
+         ((b.status === 'confirmed' || b.status === 'pending_confirmation') && nowHHMM >= b.startTime && nowHHMM <= b.endTime)
       );
       
       const cleaningBooking = todaysBookings.find((b) => 
-         !activeBooking && nowHHMM > b.endTime && nowHHMM <= b.cleaningEndTime
+         b.status === 'cleaning'
       );
 
       const upcoming = todaysBookings

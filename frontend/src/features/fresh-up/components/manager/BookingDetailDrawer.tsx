@@ -66,22 +66,42 @@ export const BookingDetailDrawer: React.FC<BookingDetailDrawerProps> = ({ isOpen
               <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 ml-1">Live Operations</h3>
               
               <div className="space-y-3">
-                 <button onClick={() => onAction?.('verify')} className="w-full bg-white border border-indigo-200 text-indigo-700 font-bold py-4 px-6 rounded-2xl hover:bg-indigo-50 hover:border-indigo-300 transition-all shadow-sm flex items-center justify-between group">
-                   <span>Authenticate Aadhaar Card</span>
-                   <span className="text-indigo-300 group-hover:text-indigo-600 transition-colors">➔</span>
-                 </button>
-                 <button onClick={() => onAction?.('check_in')} className="w-full bg-emerald-600 border border-emerald-500 text-white font-bold py-4 px-6 rounded-2xl hover:bg-emerald-700 transition-all shadow-md shadow-emerald-600/20 disabled:opacity-50 flex items-center justify-between group">
-                   <span>Execute Check-In</span>
-                   <span className="text-emerald-300 group-hover:text-white transition-colors">➔</span>
-                 </button>
-                 <button onClick={() => onAction?.('check_out')} className="w-full bg-slate-900 border border-slate-800 text-white font-bold py-4 px-6 rounded-2xl hover:bg-black transition-all shadow-lg flex items-center justify-between group">
-                   <span>Check Out & Trigger Cleaning</span>
-                   <span className="text-slate-500 group-hover:text-white transition-colors">➔</span>
-                 </button>
-                 <button onClick={() => onAction?.('reassign')} className="w-full bg-white border border-slate-200 text-slate-700 font-bold py-4 px-6 rounded-2xl hover:bg-slate-50 transition-all shadow-sm flex items-center justify-between group">
-                   <span>Re-assign Alternate Room</span>
-                   <span className="text-slate-300 group-hover:text-slate-600 transition-colors">➔</span>
-                 </button>
+                 {booking.status !== 'checked_in' && booking.status !== 'cleaning' && booking.status !== 'completed' && booking.status !== 'cancelled' && (
+                   <button onClick={() => onAction?.('check_in')} className="w-full bg-emerald-600 border border-emerald-500 text-white font-bold py-4 px-6 rounded-2xl hover:bg-emerald-700 transition-all shadow-md shadow-emerald-600/20 flex items-center justify-between group">
+                     <span>Execute Check-In</span>
+                     <span className="text-emerald-300 group-hover:text-white transition-colors">➔</span>
+                   </button>
+                 )}
+                 {booking.status === 'checked_in' && (
+                   <div className="w-full bg-slate-100 border border-slate-200 text-slate-400 font-bold py-4 px-6 rounded-2xl shadow-inner flex items-center justify-between cursor-default">
+                     <span>Payment Recorded & Checked In</span>
+                     <span>✓</span>
+                   </div>
+                 )}
+                 {booking.status === 'checked_in' && (
+                   <button onClick={() => onAction?.('check_out')} className="w-full bg-slate-900 border border-slate-800 text-white font-bold py-4 px-6 rounded-2xl hover:bg-black transition-all shadow-lg flex items-center justify-between group">
+                     <span>Check Out & Trigger Cleaning</span>
+                     <span className="text-slate-500 group-hover:text-white transition-colors">➔</span>
+                   </button>
+                 )}
+                 {booking.status === 'cleaning' && (
+                   <button onClick={() => onAction?.('completed')} className="w-full bg-amber-500 border border-amber-600 text-white font-bold py-4 px-6 rounded-2xl hover:bg-amber-600 transition-all shadow-lg flex items-center justify-between group">
+                     <span>Mark Room Cleaned & Complete</span>
+                     <span className="text-amber-200 group-hover:text-white transition-colors">➔</span>
+                   </button>
+                 )}
+                 {booking.status !== 'checked_in' && booking.status !== 'cleaning' && booking.status !== 'completed' && booking.status !== 'cancelled' && (
+                   <button onClick={() => onAction?.('reassign')} className="w-full bg-white border border-slate-200 text-slate-700 font-bold py-4 px-6 rounded-2xl hover:bg-slate-50 transition-all shadow-sm flex items-center justify-between group">
+                     <span>Re-assign Alternate Room</span>
+                     <span className="text-slate-300 group-hover:text-slate-600 transition-colors">➔</span>
+                   </button>
+                 )}
+                 {booking.verificationStatus === 'pending' && booking.status !== 'completed' && booking.status !== 'cancelled' && (
+                   <button onClick={() => onAction?.('verify')} className="w-full bg-white border border-indigo-200 text-indigo-700 font-bold py-4 px-6 rounded-2xl hover:bg-indigo-50 hover:border-indigo-300 transition-all shadow-sm flex items-center justify-between group mt-2">
+                     <span>Authenticate Aadhaar Card</span>
+                     <span className="text-indigo-300 group-hover:text-indigo-600 transition-colors">➔</span>
+                   </button>
+                 )}
               </div>
 
               <div className="mt-12 pt-8 border-t border-slate-100 text-center">
