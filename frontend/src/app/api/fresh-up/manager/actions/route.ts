@@ -19,6 +19,9 @@ export async function POST(request: NextRequest) {
        case 'check_in':
           updatePayload = { status: 'checked_in', payment_status: 'paid' };
           break;
+       case 'record_payment':
+          updatePayload = { payment_status: 'paid' };
+          break;
        case 'check_out':
           updatePayload = { status: 'cleaning', housekeeper_name: payload?.housekeeperName };
           break;

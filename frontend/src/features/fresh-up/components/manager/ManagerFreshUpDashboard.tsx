@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { DashboardHeader } from './DashboardHeader';
 import { SummaryCardsRow } from './SummaryCardsRow';
 import { FilterBar } from './FilterBar';
@@ -15,6 +15,7 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
   const [searchText, setSearchText] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>();
   const [activeBookingId, setActiveBookingId] = useState<string | null>(null);
+  const [bookingTab, setBookingTab] = useState<'upcoming' | 'occupied' | 'departed'>('upcoming');
 
   // Use hook mock for Sprint 3
   const mockSummary: FreshUpDashboardSummary = {
@@ -116,6 +117,19 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
     setLiveRooms(computed);
   }, [mockBookings]);
 
+  const filteredBookings = useMemo(() => {
+     if (bookingTab === 'upcoming') {
+        return mockBookings.filter(b => b.status === 'pending_confirmation' || b.status === 'confirmed');
+     }
+     if (bookingTab === 'occupied') {
+        return mockBookings.filter(b => b.status === 'checked_in');
+     }
+     if (bookingTab === 'departed') {
+        return mockBookings.filter(b => b.status === 'cleaning' || b.status === 'completed' || b.status === 'checked_out');
+     }
+     return mockBookings;
+  }, [mockBookings, bookingTab]);
+
   const activeBooking = mockBookings.find(b => b.bookingId === activeBookingId);
 
   const handleManagerAction = async (action: string) => {
@@ -174,8 +188,30 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
         
         <LiveScheduleBoard roomSchedules={liveRooms} onViewBooking={setActiveBookingId} onQuickAction={() => {}} />
         
-        <h2 className="text-xl font-extrabold text-slate-800 mb-6 border-b border-slate-200 pb-4">Recent Reservations</h2>
-        <BookingTable rows={mockBookings} onViewBooking={setActiveBookingId} loading={loadingBookings} />
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 border-b border-slate-200 pb-4 gap-4 mt-8">
+          <h2 className="text-xl font-extrabold text-slate-800">Reservation Folders</h2>
+          <div className="flex bg-slate-100 p-1 rounded-xl shadow-inner w-full md:w-auto">
+            <button 
+              onClick={() => setBookingTab('upcoming')}
+              className={`flex-1 md:px-6 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${bookingTab === 'upcoming' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Upcoming
+            </button>
+            <button 
+              onClick={() => setBookingTab('occupied')}
+              className={`flex-1 md:px-6 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${bookingTab === 'occupied' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Occupied
+            </button>
+            <button 
+              onClick={() => setBookingTab('departed')}
+              className={`flex-1 md:px-6 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${bookingTab === 'departed' ? 'bg-white text-slate-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Departed
+            </button>
+          </div>
+        </div>
+        <BookingTable rows={filteredBookings} onViewBooking={setActiveBookingId} loading={loadingBookings} />
       </div>
 
       <BookingDetailDrawer 

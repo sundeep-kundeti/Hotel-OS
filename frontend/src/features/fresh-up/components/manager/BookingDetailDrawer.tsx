@@ -66,6 +66,12 @@ export const BookingDetailDrawer: React.FC<BookingDetailDrawerProps> = ({ isOpen
               <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 ml-1">Live Operations</h3>
               
               <div className="space-y-3">
+                 {booking.paymentStatus !== 'paid' && booking.status !== 'cancelled' && (
+                   <button onClick={() => onAction?.('record_payment')} className="w-full bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold py-4 px-6 rounded-2xl hover:bg-indigo-100 transition-all shadow-sm flex items-center justify-between group mb-2">
+                     <span>Record Manual Payment (Cash/Card)</span>
+                     <span className="text-indigo-300 group-hover:text-indigo-600 transition-colors">➔</span>
+                   </button>
+                 )}
                  {booking.status !== 'checked_in' && booking.status !== 'cleaning' && booking.status !== 'completed' && booking.status !== 'cancelled' && (
                    <button onClick={() => onAction?.('check_in')} className="w-full bg-emerald-600 border border-emerald-500 text-white font-bold py-4 px-6 rounded-2xl hover:bg-emerald-700 transition-all shadow-md shadow-emerald-600/20 flex items-center justify-between group">
                      <span>Execute Check-In</span>
