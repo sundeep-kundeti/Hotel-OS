@@ -129,10 +129,19 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
       payload.reason = reason;
     }
     if (action === 'reassign') {
-      const room = window.prompt("Which exact room number to force assign?");
+      const room = window.prompt("Which exact room number (e.g. 506) to force assign?");
       if (!room) return;
+      
+      const reason = window.prompt("Reason for override (e.g. Broken AC)?");
+      if (!reason) return;
+      
       payload.roomNumber = room;
-      payload.reason = 'Manual Override';
+      payload.reason = reason;
+    }
+    if (action === 'check_out' || action === 'completed') {
+      const hname = window.prompt(`Please specify the Housekeeper Name for ensuring Room ${activeBooking.roomNumber} is correctly processed:`);
+      if (!hname) return;
+      payload.housekeeperName = hname;
     }
 
     try {
@@ -141,12 +150,13 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ bookingId: activeBooking.bookingId, action, payload })
       });
-      if (!res.ok) throw new Error('API Sync Failed.');
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'API Sync Failed.');
       
       // Force refresh data
       window.location.reload();
-    } catch(e) {
-      alert('Network transmission failed: ' + e);
+    } catch(e: any) {
+      alert('Operation Blocked: ' + e.message);
     }
   };
 

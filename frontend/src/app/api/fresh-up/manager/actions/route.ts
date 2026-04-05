@@ -20,12 +20,33 @@ export async function POST(request: NextRequest) {
           updatePayload = { status: 'checked_in' };
           break;
        case 'check_out':
-          updatePayload = { status: 'cleaning' }; // Instantly blocks room and requests cleaning
+          updatePayload = { status: 'cleaning', housekeeper_name: payload?.housekeeperName };
           break;
        case 'completed':
-          updatePayload = { status: 'completed' }; // Releases room to pool
+          updatePayload = { status: 'completed', housekeeper_name: payload?.housekeeperName };
           break;
        case 'reassign':
+          const newRoom = payload?.roomNumber;
+          // Step 1: Secure current bounds
+          const { data: cb } = await supabaseServer.from('fresh_up_bookings').select('*').eq('id', bookingId).single();
+          if (cb && newRoom) {
+             // Step 2: Ensure the target room isn't overlapping
+             const { data: conflicts } = await supabaseServer
+                .from('fresh_up_bookings')
+                .select('*')
+                .eq('room_number', newRoom)
+                .eq('booking_date', cb.booking_date)
+                .neq('id', bookingId)
+                .neq('status', 'cancelled')
+                .neq('status', 'rejected')
+                .lt('start_time', cb.cleaning_end_time)
+                .gt('cleaning_end_time', cb.start_time);
+             
+             if (conflicts && conflicts.length > 0) {
+                 return NextResponse.json({ error: `Room ${newRoom} cannot be forced. It currently violates an active physical cleaning/occupation block.` }, { status: 409 });
+             }
+          }
+
           updatePayload = { 
              room_number: payload?.roomNumber,
              manager_remarks: `[REASSIGNED] Reason: ${payload?.reason}`
