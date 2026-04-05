@@ -2,7 +2,7 @@ import React from 'react';
 import { ManagerRoomScheduleCardData } from '../../types/freshUp.types';
 
 export const ManagerRoomScheduleCard: React.FC<ManagerRoomScheduleCardData> = ({
-  roomNumber, currentStatus, currentGuestName, nextAvailableTime, currentBookingEnd
+  roomNumber, currentStatus, currentGuestName, nextAvailableTime, currentBookingEnd, todaysBookings
 }) => {
   const getStatusStyle = () => {
     switch (currentStatus) {
@@ -38,6 +38,54 @@ export const ManagerRoomScheduleCard: React.FC<ManagerRoomScheduleCardData> = ({
           <p className="text-[10px] uppercase font-bold tracking-wider opacity-70 mt-2">Next Slot: {nextAvailableTime}</p>
         )}
       </div>
+
+      {todaysBookings && todaysBookings.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-slate-200/50">
+          <div className="flex justify-between text-[8px] uppercase tracking-widest text-slate-400 font-bold mb-1.5 opacity-70">
+             <span>00:00</span>
+             <span>12:00</span>
+             <span>23:59</span>
+          </div>
+          <div className="relative h-2 w-full bg-slate-200/60 rounded-full overflow-hidden shadow-inner">
+             {todaysBookings.filter((b: any) => b.status !== 'cancelled' && b.status !== 'rejected').map((b: any) => {
+                const [sh, sm] = b.startTime.split(':').map(Number);
+                const startPercentage = ((sh * 60 + sm) / 1440) * 100;
+                
+                const [eh, em] = b.endTime.split(':').map(Number);
+                const endPercentage = ((eh * 60 + em) / 1440) * 100;
+
+                const [ch, cm] = b.cleaningEndTime.split(':').map(Number);
+                const cleaningPercentage = ((ch * 60 + cm) / 1440) * 100;
+
+                const activeWidth = Math.max(endPercentage - startPercentage, 0.5);
+                const cleaningWidth = Math.max(cleaningPercentage - endPercentage, 0.5);
+
+                const getBlockColor = () => {
+                   if (b.status === 'checked_out' || b.status === 'completed') return 'bg-slate-400';
+                   if (b.status === 'checked_in') return 'bg-indigo-500';
+                   return 'bg-blue-400 opacity-80'; // confirmed
+                };
+
+                return (
+                  <React.Fragment key={b.bookingId}>
+                    {/* Occupied Block */}
+                    <div 
+                      className={`absolute top-0 bottom-0 ${getBlockColor()}`} 
+                      style={{ left: `${startPercentage}%`, width: `${activeWidth}%` }} 
+                      title={`${b.guestName}: ${b.startTime} - ${b.endTime}`} 
+                    />
+                    {/* Cleaning Buffer Block */}
+                    <div 
+                      className="absolute top-0 bottom-0 bg-amber-400 opacity-90" 
+                      style={{ left: `${endPercentage}%`, width: `${cleaningWidth}%` }} 
+                      title={`Cleaning: ${b.endTime} - ${b.cleaningEndTime}`} 
+                    />
+                  </React.Fragment>
+                );
+             })}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

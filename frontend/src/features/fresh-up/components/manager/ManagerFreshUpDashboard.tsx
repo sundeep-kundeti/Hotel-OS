@@ -6,7 +6,9 @@ import { FilterBar } from './FilterBar';
 import { LiveScheduleBoard } from './LiveScheduleBoard';
 import { BookingTable } from './BookingTable';
 import { BookingDetailDrawer } from './BookingDetailDrawer';
-import { FreshUpDashboardSummary, ManagerRoomScheduleCardData, ManagerBookingTableRow } from '../../types/freshUp.types';
+import { FreshUpDashboardSummary, ManagerRoomScheduleCardData, ManagerBookingTableRow, FreshUpRoomStatus } from '../../types/freshUp.types';
+import { FRESH_UP_PRIMARY_ROOMS } from '../../constants/freshUp.constants';
+import { getLocalISTTime } from '../../services/freshUp.time';
 
 export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?: string }) {
   const [selectedDate, setSelectedDate] = useState(initialDate || new Date().toISOString().slice(0, 10));
@@ -24,12 +26,7 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
      expectedCollectionToday: 4800
   };
 
-  const mockRooms: ManagerRoomScheduleCardData[] = [
-    { roomNumber: '501', floor: 5, currentStatus: 'available' },
-    { roomNumber: '502', floor: 5, currentStatus: 'occupied', currentGuestName: 'Rajesh Kumar', currentBookingEnd: '14:30' },
-    { roomNumber: '503', floor: 5, currentStatus: 'cleaning', currentBookingEnd: '12:00', nextAvailableTime: '12:15' },
-    { roomNumber: '504', floor: 5, currentStatus: 'reserved', currentGuestName: 'Anil Reddy', currentBookingEnd: '16:00' },
-  ];
+  const [liveRooms, setLiveRooms] = useState<ManagerRoomScheduleCardData[]>([]);
 
   const [mockBookings, setMockBookings] = useState<ManagerBookingTableRow[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
@@ -70,6 +67,54 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
     };
     fetchManagerBookings();
   }, [selectedDate]);
+
+  useEffect(() => {
+    const nowHHMM = getLocalISTTime();
+    
+    const computed: ManagerRoomScheduleCardData[] = FRESH_UP_PRIMARY_ROOMS.map((roomNum) => {
+      const floor = roomNum.startsWith('5') ? 5 : 6;
+      const todaysBookings = mockBookings.filter((b) => b.roomNumber === roomNum && b.status !== 'cancelled' && b.status !== 'rejected');
+      
+      let currentStatus: FreshUpRoomStatus | 'reserved' = 'available';
+      let currentGuestName: string | undefined;
+      let currentBookingEnd: string | undefined;
+      let nextAvailableTime: string | undefined;
+
+      const activeBooking = todaysBookings.find((b) => 
+         (nowHHMM >= b.startTime && nowHHMM <= b.endTime) || 
+         (b.status === 'checked_in')
+      );
+      
+      const cleaningBooking = todaysBookings.find((b) => 
+         !activeBooking && nowHHMM > b.endTime && nowHHMM <= b.cleaningEndTime
+      );
+
+      const upcoming = todaysBookings
+         .filter((b) => b.startTime > nowHHMM)
+         .sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
+
+      if (activeBooking) {
+         currentStatus = 'occupied';
+         currentGuestName = activeBooking.guestName;
+         currentBookingEnd = activeBooking.endTime;
+      } else if (cleaningBooking) {
+         currentStatus = 'cleaning';
+         currentBookingEnd = cleaningBooking.cleaningEndTime;
+         nextAvailableTime = cleaningBooking.cleaningEndTime;
+      }
+
+      return {
+         roomNumber: roomNum,
+         floor,
+         currentStatus,
+         currentGuestName,
+         currentBookingEnd,
+         nextAvailableTime: nextAvailableTime || (upcoming ? upcoming.startTime : undefined),
+         todaysBookings
+      };
+    });
+    setLiveRooms(computed);
+  }, [mockBookings]);
 
   const activeBooking = mockBookings.find(b => b.bookingId === activeBookingId);
 
@@ -117,7 +162,7 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
            onDateChange={setSelectedDate} onSearchChange={setSearchText} onStatusChange={setSelectedStatus} onRoomChange={() => {}}
         />
         
-        <LiveScheduleBoard roomSchedules={mockRooms} onViewBooking={setActiveBookingId} onQuickAction={() => {}} />
+        <LiveScheduleBoard roomSchedules={liveRooms} onViewBooking={setActiveBookingId} onQuickAction={() => {}} />
         
         <h2 className="text-xl font-extrabold text-slate-800 mb-6 border-b border-slate-200 pb-4">Recent Reservations</h2>
         <BookingTable rows={mockBookings} onViewBooking={setActiveBookingId} loading={loadingBookings} />

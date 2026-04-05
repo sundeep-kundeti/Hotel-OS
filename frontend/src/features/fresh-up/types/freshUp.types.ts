@@ -134,6 +134,7 @@ export type ManagerRoomScheduleCardData = {
   nextAvailableTime?: string;
   nextBookingStart?: string;
   nextBookingGuestName?: string;
+  todaysBookings?: ManagerBookingTableRow[];
 };
 
 export type ManagerBookingTableRow = {
