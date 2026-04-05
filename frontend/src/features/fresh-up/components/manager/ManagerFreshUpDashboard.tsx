@@ -152,6 +152,12 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
       payload.roomNumber = room;
       payload.reason = reason;
     }
+    if (action === 'check_in') {
+      if (activeBooking.paymentStatus !== 'paid') {
+         const confirmPayment = window.confirm(`Payment strictly requires collection before entry. Have you physically received ₹${activeBooking.amount}? Click OK to formally record payment and force Check-In.`);
+         if (!confirmPayment) return;
+      }
+    }
     if (action === 'check_out' || action === 'completed') {
       const hname = window.prompt(`Please specify the Housekeeper Name for ensuring Room ${activeBooking.roomNumber} is correctly processed:`);
       if (!hname) return;
