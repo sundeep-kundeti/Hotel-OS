@@ -1,5 +1,7 @@
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { LogOut } from 'lucide-react';
 import { DashboardHeader } from './DashboardHeader';
 import { SummaryCardsRow } from './SummaryCardsRow';
 import { FilterBar } from './FilterBar';
@@ -11,6 +13,7 @@ import { FRESH_UP_PRIMARY_ROOMS } from '../../constants/freshUp.constants';
 import { getLocalISTTime } from '../../services/freshUp.time';
 
 export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?: string }) {
+  const router = useRouter();
   const [selectedDate, setSelectedDate] = useState(initialDate || new Date().toISOString().slice(0, 10));
   const [searchText, setSearchText] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string | undefined>();
@@ -180,10 +183,28 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
     }
   };
 
+  const handleLogout = async () => {
+     try {
+       await fetch('/api/auth/logout', { method: 'POST' });
+       router.push('/login');
+     } catch (err) {
+       console.error("Logout failure");
+     }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans pb-24">
       <div className="max-w-[1400px] mx-auto">
-        <DashboardHeader />
+        <div className="flex justify-between items-center mb-8">
+          <DashboardHeader />
+          <button 
+             onClick={handleLogout}
+             className="flex items-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold px-4 py-2 rounded-xl transition-all border border-red-500/20 group"
+          >
+             <LogOut size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+             <span className="hidden sm:inline">Log Out</span>
+          </button>
+        </div>
         
         <SummaryCardsRow summary={mockSummary} loading={false} />
         

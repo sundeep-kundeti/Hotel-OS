@@ -8,10 +8,10 @@ export const runtime = 'edge';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { phone, fullName, email, dob, anniversary, city, promotionalConsent } = body;
+    const { phone, password, fullName, email, dob, anniversary, city, promotionalConsent } = body;
     
-    if (!phone || !fullName) {
-      return NextResponse.json({ error: 'Phone and Full Name are strictly required to build the profile.' }, { status: 400 });
+    if (!phone || !fullName || !password) {
+      return NextResponse.json({ error: 'Phone, Password, and Full Name are strictly required to build the profile.' }, { status: 400 });
     }
 
     let processedPhone = phone.replace(/\D/g, '');
@@ -19,9 +19,13 @@ export async function POST(req: Request) {
       processedPhone = '91' + processedPhone;
     }
 
+    // Hash Password for storing
+    const hashed_password = await computeHash(password);
+
     // 1. Insert into Supabase 'guests'
     const payload: any = {
         phone_number: processedPhone,
+        password_hash: hashed_password,
         full_name: fullName,
         promotional_consent: promotionalConsent ?? true
     };
@@ -81,4 +85,12 @@ async function issueSecureToken(phone: string, role: string) {
     });
 
     return NextResponse.json({ success: true, status: 'authenticated', role });
+}
+
+async function computeHash(password: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password + (process.env.JWT_SECRET || 'hotel_crypto_salt_123'));
+    const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }

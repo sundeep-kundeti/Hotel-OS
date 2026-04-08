@@ -10,6 +10,7 @@ export default function SrimuniSignupPage() {
   const [error, setError] = useState('');
 
   const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
   const [profile, setProfile] = useState({
      fullName: '', email: '', dob: '', anniversary: '', city: '', promotionalConsent: true
   });
@@ -18,11 +19,12 @@ export default function SrimuniSignupPage() {
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (phone.length < 10) return setError('Please enter a valid 10-digit mobile number.');
+    if (!password) return setError('Password is required.');
     setLoading(true); setError('');
 
     try {
       const res = await fetch('/api/auth/login-direct', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone })
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phone, password })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Authentication Failed');
@@ -48,7 +50,7 @@ export default function SrimuniSignupPage() {
      try {
        const res = await fetch('/api/auth/register-guest', {
            method: 'POST', headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ phone, ...profile })
+           body: JSON.stringify({ phone, password, ...profile })
        });
        const data = await res.json();
        if (!res.ok) throw new Error(data.error || 'Registration Failed');
@@ -171,7 +173,7 @@ export default function SrimuniSignupPage() {
                <form onSubmit={handlePhoneSubmit} className="space-y-6">
                  <div>
                    <label className="block text-[13px] font-bold text-slate-700 mb-2 uppercase tracking-wider">Mobile Number</label>
-                   <div className="flex shadow-sm rounded-xl focus-within:ring-2 focus-within:ring-[#1A1D20] transition-all">
+                   <div className="flex shadow-sm rounded-xl mb-4 focus-within:ring-2 focus-within:ring-[#1A1D20] transition-all">
                      <span className="inline-flex items-center px-4 rounded-l-xl border border-r-0 border-slate-300 bg-slate-50 text-slate-500 font-black">
                        +91
                      </span>
@@ -182,14 +184,28 @@ export default function SrimuniSignupPage() {
                        placeholder="Enter 10 digits"
                        className="flex-1 w-full px-4 py-3.5 rounded-r-xl border border-slate-300 focus:outline-none text-slate-800 font-bold text-lg"
                        disabled={loading}
+                       autoComplete="username"
                        autoFocus
+                     />
+                   </div>
+                   
+                   <label className="block text-[13px] font-bold text-slate-700 mb-2 mt-4 uppercase tracking-wider">Secure Password</label>
+                   <div className="flex shadow-sm rounded-xl focus-within:ring-2 focus-within:ring-[#1A1D20] transition-all">
+                     <input 
+                       type="password" 
+                       value={password}
+                       onChange={e => setPassword(e.target.value)}
+                       placeholder="Enter your password"
+                       className="w-full px-4 py-3.5 rounded-xl border border-slate-300 focus:outline-none text-slate-800 font-bold text-lg"
+                       disabled={loading}
+                       autoComplete="current-password"
                      />
                    </div>
                  </div>
 
                  <button
                    type="submit"
-                   disabled={loading || phone.length !== 10}
+                   disabled={loading || phone.length !== 10 || !password}
                    className="w-full bg-[#1A1D20] hover:bg-[#2A2D30] text-white font-bold py-4 rounded-xl transition-all shadow-md active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group flex items-center justify-center gap-2"
                  >
                    {loading ? 'Authenticating...' : 'Continue Securely'}
