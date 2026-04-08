@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, ChevronRight, User, Mail, Calendar, MapPin, Building2, Phone, ShieldCheck, Clock, Gift, Headset } from 'lucide-react';
+import { CheckCircle2, ChevronRight, User, Mail, Calendar, MapPin, Building2, Phone, ShieldCheck, Clock, Gift, Headset, Lock } from 'lucide-react';
 
 export default function SrimuniSignupPage() {
   const router = useRouter();
@@ -10,6 +10,7 @@ export default function SrimuniSignupPage() {
   const [error, setError] = useState('');
 
   const [phone, setPhone] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState('');
   const [profile, setProfile] = useState({
      fullName: '', email: '', dob: '', anniversary: '', city: '', promotionalConsent: true
@@ -180,7 +181,12 @@ export default function SrimuniSignupPage() {
                      <input 
                        type="tel" 
                        value={phone}
-                       onChange={e => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                       onChange={e => {
+                          const newPhone = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setPhone(newPhone);
+                          if (newPhone.length === 10) setShowPassword(true);
+                          else setShowPassword(false);
+                       }}
                        placeholder="Enter 10 digits"
                        className="flex-1 w-full px-4 py-3.5 rounded-r-xl border border-slate-300 focus:outline-none text-slate-800 font-bold text-lg"
                        disabled={loading}
@@ -189,18 +195,27 @@ export default function SrimuniSignupPage() {
                      />
                    </div>
                    
-                   <label className="block text-[13px] font-bold text-slate-700 mb-2 mt-4 uppercase tracking-wider">Secure Password</label>
-                   <div className="flex shadow-sm rounded-xl focus-within:ring-2 focus-within:ring-[#1A1D20] transition-all">
-                     <input 
-                       type="password" 
-                       value={password}
-                       onChange={e => setPassword(e.target.value)}
-                       placeholder="Enter your password"
-                       className="w-full px-4 py-3.5 rounded-xl border border-slate-300 focus:outline-none text-slate-800 font-bold text-lg"
-                       disabled={loading}
-                       autoComplete="current-password"
-                     />
-                   </div>
+                   {showPassword && (
+                     <div className="mt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                       <label className="block text-[13px] font-bold text-slate-700 mb-2 uppercase tracking-wider">Secure Password</label>
+                       <div className="flex shadow-sm rounded-xl focus-within:ring-2 focus-within:ring-[#1A1D20] transition-all">
+                         <input 
+                           type="password" 
+                           value={password}
+                           onChange={e => setPassword(e.target.value)}
+                           placeholder="Enter your password"
+                           className="w-full px-4 py-3.5 rounded-xl border border-slate-300 focus:outline-none text-slate-800 font-bold text-lg"
+                           disabled={loading}
+                           autoComplete="current-password"
+                         />
+                       </div>
+                       <div className="text-right mt-3">
+                           <button type="button" onClick={() => { setPassword(''); setStep(2); }} className="text-[13px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
+                             Don't have an account? Sign Up
+                           </button>
+                       </div>
+                     </div>
+                   )}
                  </div>
 
                  <button
@@ -226,15 +241,19 @@ export default function SrimuniSignupPage() {
              {/* STEP 2: Profile */}
              {step === 2 && (
                <form onSubmit={handleProfileSubmit} className="space-y-4">
-                 <div className="grid grid-cols-1 gap-4">
-                    <div className="relative">
-                      <div className="absolute left-4 top-3.5 text-slate-400"><User size={18} /></div>
-                      <input type="text" placeholder="Full Name *" required value={profile.fullName} onChange={e => setProfile({...profile, fullName: e.target.value})} className="w-full pl-12 pr-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-slate-300 focus:ring-2 focus:ring-[#1A1D20] focus:bg-white text-slate-800 font-semibold transition-all" />
-                    </div>
-                    <div className="relative">
-                      <div className="absolute left-4 top-3.5 text-slate-400"><Mail size={18} /></div>
-                      <input type="email" placeholder="Email Address (Optional)" value={profile.email} onChange={e => setProfile({...profile, email: e.target.value})} className="w-full pl-12 pr-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-slate-300 focus:ring-2 focus:ring-[#1A1D20] focus:bg-white text-slate-800 font-semibold transition-all" />
-                    </div>
+                  <div className="grid grid-cols-1 gap-4">
+                     <div className="relative">
+                       <div className="absolute left-4 top-3.5 text-slate-400"><Lock size={18} /></div>
+                       <input type="password" placeholder="Create a secure password *" required value={password} onChange={e => setPassword(e.target.value)} className="w-full pl-12 pr-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-slate-300 focus:ring-2 focus:ring-[#1A1D20] focus:bg-white text-slate-800 font-semibold transition-all" autoComplete="new-password" />
+                     </div>
+                     <div className="relative">
+                       <div className="absolute left-4 top-3.5 text-slate-400"><User size={18} /></div>
+                       <input type="text" placeholder="Full Name *" required value={profile.fullName} onChange={e => setProfile({...profile, fullName: e.target.value})} className="w-full pl-12 pr-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-slate-300 focus:ring-2 focus:ring-[#1A1D20] focus:bg-white text-slate-800 font-semibold transition-all" />
+                     </div>
+                     <div className="relative">
+                       <div className="absolute left-4 top-3.5 text-slate-400"><Mail size={18} /></div>
+                       <input type="email" placeholder="Email Address (Optional)" value={profile.email} onChange={e => setProfile({...profile, email: e.target.value})} className="w-full pl-12 pr-4 py-3.5 bg-slate-50 rounded-xl border border-slate-200 focus:border-slate-300 focus:ring-2 focus:ring-[#1A1D20] focus:bg-white text-slate-800 font-semibold transition-all" />
+                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div className="relative">
                           <label className="block text-[10px] font-bold text-slate-400 mb-1 ml-1 uppercase">Date of Birth</label>

@@ -81,7 +81,7 @@ async function issueSecureToken(phone: string, role: string) {
        secure: process.env.NODE_ENV === 'production',
        sameSite: 'strict',
        path: '/',
-       maxAge: 86400 * 7 // 7 Days
+       maxAge: 60 * 10 // 10 Minutes
     });
 
     return NextResponse.json({ success: true, status: 'authenticated', role });
