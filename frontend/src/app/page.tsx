@@ -29,7 +29,7 @@ export default function SrimuniSignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#F9F9F8] font-sans antialiased text-slate-800">
+    <div className="min-h-screen flex flex-col-reverse md:flex-row bg-[#F9F9F8] font-sans antialiased text-slate-800">
       
       {/* LEFT: BRAND MARKETING PANEL */}
       <div className="w-full md:w-[45%] lg:w-[50%] bg-[#1A1D20] text-stone-100 flex flex-col p-8 md:p-12 lg:p-20 relative overflow-hidden">
@@ -92,7 +92,16 @@ export default function SrimuniSignupPage() {
       </div>
 
       {/* RIGHT: SIGNUP FLOW PANEL */}
-      <div className="w-full md:w-[55%] lg:w-[50%] flex items-center justify-center p-6 md:p-12">
+      <div className="w-full md:w-[55%] lg:w-[50%] flex flex-col items-center justify-center p-6 md:p-12 mt-8 md:mt-0">
+        
+        {/* Mobile Header Context */}
+        <div className="md:hidden flex items-center gap-3 mb-6 w-full max-w-md">
+           <div className="w-8 h-8 rounded-sm bg-slate-900 flex items-center justify-center text-[#D4AF37]">
+              <Building2 size={20} strokeWidth={2.5} />
+           </div>
+           <span className="text-2xl font-black tracking-tight text-slate-900">Srimuni Hotels</span>
+        </div>
+
         <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden transform transition-all">
            
            {/* Form Header */}
