@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/supabaseServer";
 
+export const runtime = 'edge';
+
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN || 'hotel_os_secret_token_123';
 
 export async function GET(req: NextRequest) {
