@@ -14,7 +14,7 @@ export default function SrimuniSignupPage() {
   };
 
   const router = useRouter();
-  const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -144,12 +144,6 @@ export default function SrimuniSignupPage() {
            
            {/* Form Header */}
            <div className="bg-slate-50 border-b border-slate-100 p-8 text-center relative">
-              {step === 0 && (
-                 <>
-                   <h2 className="text-2xl font-black text-slate-800 tracking-tight">Get started</h2>
-                   <p className="text-slate-500 text-sm mt-2 font-medium">Choose how you want to book your stay at Srimuni Hotels</p>
-                 </>
-              )}
               {step === 1 && (
                  <>
                    <h2 className="text-2xl font-black text-slate-800 tracking-tight">Mobile Login</h2>
@@ -170,7 +164,7 @@ export default function SrimuniSignupPage() {
               )}
 
               {/* Progress Indicator */}
-              {step !== 3 && step !== 0 && (
+              {step !== 3 && (
                  <div className="absolute bottom-[-1px] left-0 h-[3px] bg-slate-200 w-full">
                     <div className="h-full bg-gradient-to-r from-[#D4AF37] to-[#b38f20] transition-all duration-500 ease-in-out" style={{ width: step === 1 ? '50%' : '100%' }} />
                  </div>
@@ -184,66 +178,10 @@ export default function SrimuniSignupPage() {
                </div>
              )}
 
-             {/* STEP 0: CHOICES */}
-             {step === 0 && (
-                <div className="space-y-6">
-                  {/* Primary Actions & Explanations Combined */}
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    
-                    {/* Left: Mobile Login */}
-                    <div className="flex flex-col">
-                      <button
-                        type="button"
-                        onClick={() => setStep(1)}
-                        className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 text-base font-bold text-white shadow-md transition hover:bg-slate-800"
-                      >
-                        Continue with Mobile
-                        <span className="text-xl">›</span>
-                      </button>
-                      <div className="mt-3 text-center px-2">
-                        <p className="text-xs font-bold text-slate-600">Website Booking</p>
-                        <p className="mt-0.5 text-[11px] text-slate-400 font-medium leading-tight">Save your profile & book faster next time</p>
-                      </div>
-                    </div>
-
-                    {/* Right: WhatsApp */}
-                    <div className="flex flex-col">
-                      <a
-                        href={`https://wa.me/917075170769?text=${encodeURIComponent("Hi Srimuni Hotels, I want to book a Fresh Up Room.\nDate: \nTime: \nDuration: \nPax: \nPayment: Pay at Hotel")}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 text-base font-bold text-white shadow-md transition hover:bg-[#1ebe5d]"
-                      >
-                        Book on WhatsApp
-                        <span className="text-xl">›</span>
-                      </a>
-                      <div className="mt-3 text-center px-2">
-                        <p className="text-xs font-bold text-emerald-600">WhatsApp Booking</p>
-                        <p className="mt-0.5 text-[11px] text-emerald-500 font-medium leading-tight">Chat directly & confirm instantly</p>
-                      </div>
-                    </div>
-
-                  </div>
-
-                  <div className="relative flex items-center justify-center mt-6 mb-4">
-                     <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
-                     <div className="relative bg-white px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">OR</div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleGuestContinue}
-                    className="h-14 w-full rounded-2xl border-2 border-slate-200 bg-white text-base font-bold text-slate-700 transition hover:bg-slate-50"
-                  >
-                    Continue as Guest
-                  </button>
-                </div>
-             )}
-
              {/* STEP 1: Phone */}
              {step === 1 && (
                <form onSubmit={handlePhoneSubmit} className="space-y-6">
-                 <button type="button" onClick={() => { setStep(0); setError(''); }} className="text-sm font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 -mt-2 mb-2 transition-colors">
+                 <button type="button" onClick={() => router.push('/')} className="text-sm font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 -mt-2 mb-2 transition-colors">
                    <ChevronRight size={14} className="rotate-180" /> Back
                  </button>
                  <div>
