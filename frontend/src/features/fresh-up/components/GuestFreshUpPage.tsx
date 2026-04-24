@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { PageHeader } from './PageHeader';
 import { BookingControlBar } from './BookingControlBar';
-import { GuestSlotTracker } from './GuestSlotTracker';
+
 import { BookingSummaryCard } from './BookingSummaryCard';
 import { CustomerDetailsForm } from './CustomerDetailsForm';
 import { SubmitBookingButton } from './SubmitBookingButton';
@@ -134,7 +134,7 @@ export default function GuestFreshUpPage({ initialDate, isAuthenticated }: Guest
         
         {/* Left Column: UI Form Elements */}
         <div className="flex-1 space-y-8">
-          <PageHeader />
+          <PageHeader availableSlots={availableSlots.length} loadingSlots={availabilityLoading} />
           <BookingControlBar
             selectedDate={selectedDate} selectedPax={selectedPax}
             selectedDuration={selectedDuration} selectedStartTime={selectedStartTime}
@@ -142,7 +142,6 @@ export default function GuestFreshUpPage({ initialDate, isAuthenticated }: Guest
             onDurationChange={setSelectedDuration} onStartTimeChange={setSelectedStartTime}
             disabled={loading}
           />
-          <GuestSlotTracker rooms={rooms} loading={availabilityLoading} />
           
           <div className={`pt-8 border-t border-slate-200 mt-12 transition-all duration-500 opacity-100 ${availableSlots.length === 0 ? 'hidden' : 'block'}`} id="customer-form">
             <CustomerDetailsForm values={values} errors={errors} onChange={(field, value) => updateField(field as any, value)} disabled={loading} />
@@ -151,7 +150,7 @@ export default function GuestFreshUpPage({ initialDate, isAuthenticated }: Guest
         </div>
         
         {/* Right Column: Sticky Summary Card */}
-        <div className="lg:w-[400px] flex-shrink-0 order-first lg:order-last">
+        <div className="lg:w-[400px] flex-shrink-0 mt-8 lg:mt-0">
           <div className="sticky top-8">
             <BookingSummaryCard
               roomNumber="Allocated on Arrival" bookingDate={selectedDate}

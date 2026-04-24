@@ -3,7 +3,12 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { BedDouble, Users } from 'lucide-react';
 
-export const PageHeader: React.FC = () => {
+interface PageHeaderProps {
+  availableSlots?: number;
+  loadingSlots?: boolean;
+}
+
+export const PageHeader: React.FC<PageHeaderProps> = ({ availableSlots, loadingSlots }) => {
   const router = useRouter();
 
   return (
@@ -15,9 +20,31 @@ export const PageHeader: React.FC = () => {
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-indigo-800 mb-1 leading-tight whitespace-nowrap">
           Srinivasa Residency by Srimuni
         </h1>
-        <h2 className="text-base md:text-lg font-bold text-indigo-500 mb-4 uppercase tracking-wide">
-          Fresh Up Rooms
-        </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
+          <h2 className="text-base md:text-lg font-bold text-indigo-500 uppercase tracking-wide">
+            Fresh Up Rooms
+          </h2>
+          {availableSlots !== undefined && (
+            <div className="flex items-center gap-2">
+              <span className="text-slate-300 hidden sm:inline">•</span>
+              {loadingSlots ? (
+                <span className="text-xs font-bold text-indigo-400 bg-indigo-50 px-2.5 py-1 rounded-full animate-pulse border border-indigo-100">Checking Slots...</span>
+              ) : availableSlots > 0 ? (
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 shadow-sm px-2.5 py-1 rounded-full flex items-center gap-1.5 transition-all">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  {availableSlots} Slots Available
+                </span>
+              ) : (
+                <span className="text-xs font-bold text-rose-700 bg-rose-50 border border-rose-200 shadow-sm px-2.5 py-1 rounded-full">
+                  Sold Out
+                </span>
+              )}
+            </div>
+          )}
+        </div>
         
         <p className="text-slate-600 font-medium max-w-3xl text-sm md:text-base leading-relaxed mx-auto md:mx-0 mb-6">
           Book an hourly fresh-up room natively. Select your date, time, and duration for live availability. Strictly for wash & change purposes.

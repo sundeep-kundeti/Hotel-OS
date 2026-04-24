@@ -13,7 +13,17 @@ export default function SrimuniSignupPage() {
     return `${year}-${month}-${day}`;
   };
 
+  const getToday = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const router = useRouter();
+  const [showWhatsAppForm, setShowWhatsAppForm] = useState(false);
+  const [waData, setWaData] = useState({ date: getToday(), time: '08:00', duration: '1 Hour', pax: '1 Guest' });
   const handleGuestContinue = () => {
       router.push('/fresh-up'); // Bypassing login entirely to view public slots
   }
@@ -87,64 +97,111 @@ export default function SrimuniSignupPage() {
            
            {/* Form Header */}
            <div className="bg-slate-50 border-b border-slate-100 p-8 text-center relative">
-               <h2 className="text-2xl font-black text-slate-800 tracking-tight">Get started</h2>
-               <p className="text-slate-500 text-sm mt-2 font-medium">Choose how you want to book your stay at Srimuni Hotels</p>
+               <h2 className="text-2xl font-black text-slate-800 tracking-tight">
+                 {showWhatsAppForm ? 'WhatsApp Booking' : 'Get started'}
+               </h2>
+               <p className="text-slate-500 text-sm mt-2 font-medium">
+                 {showWhatsAppForm ? 'Enter your travel details to instantly book via WhatsApp.' : 'Choose how you want to book your stay at Srimuni Hotels'}
+               </p>
            </div>
 
-           <div className="p-8">
+            <div className="p-8">
               {/* Main Landing Choices */}
-              <div className="space-y-6">
-                {/* Primary Actions & Explanations Combined */}
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  
-                  {/* Left: Mobile Login */}
-                  <div className="flex flex-col">
-                    <button
-                      type="button"
-                      onClick={() => router.push('/login')}
-                      className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 text-base font-bold text-white shadow-md transition hover:bg-slate-800"
-                    >
-                      Continue with Mobile
-                      <span className="text-xl">›</span>
-                    </button>
-                    <div className="mt-3 text-center px-2">
-                      <p className="text-xs font-bold text-slate-600">Website Booking</p>
-                      <p className="mt-0.5 text-[11px] text-slate-400 font-medium leading-tight">Save your profile & book faster next time</p>
+              {showWhatsAppForm ? (
+                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                   <button type="button" onClick={() => setShowWhatsAppForm(false)} className="text-sm font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 -mt-2 mb-2 transition-colors">
+                     <ChevronRight size={14} className="rotate-180" /> Back
+                   </button>
+                   
+                   <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase tracking-wider">Date</label>
+                        <input type="date" value={waData.date} min={getToday()} onChange={e => setWaData({...waData, date: e.target.value})} className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#25D366] text-slate-800 font-semibold text-sm" />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase tracking-wider">Time</label>
+                        <input type="time" value={waData.time} onChange={e => setWaData({...waData, time: e.target.value})} className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#25D366] text-slate-800 font-semibold text-sm" />
+                      </div>
+                      <div>
+                         <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase tracking-wider">Duration</label>
+                         <select value={waData.duration} onChange={e => setWaData({...waData, duration: e.target.value})} className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#25D366] text-slate-800 font-semibold text-sm">
+                            <option>1 Hour</option>
+                            <option>2 Hours</option>
+                            <option>3 Hours</option>
+                         </select>
+                      </div>
+                      <div>
+                         <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase tracking-wider">Guests</label>
+                         <select value={waData.pax} onChange={e => setWaData({...waData, pax: e.target.value})} className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#25D366] text-slate-800 font-semibold text-sm">
+                            <option>1 Guest</option>
+                            <option>2 Guests</option>
+                         </select>
+                      </div>
+                   </div>
+
+                   <a
+                     href={`https://wa.me/917075170769?text=${encodeURIComponent(`Hi Srimuni Hotels, I want to book a Fresh Up Room.\nDate: ${waData.date}\nTime: ${waData.time}\nDuration: ${waData.duration}\nPax: ${waData.pax}\nPayment: Pay at Hotel`)}`}
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 text-base font-bold text-white shadow-md transition hover:bg-[#1ebe5d]"
+                   >
+                     Send Booking to WhatsApp
+                     <span className="text-xl">›</span>
+                   </a>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {/* Primary Actions & Explanations Combined */}
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    
+                    {/* Left: Mobile Login */}
+                    <div className="flex flex-col">
+                      <button
+                        type="button"
+                        onClick={() => router.push('/login')}
+                        className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 text-base font-bold text-white shadow-md transition hover:bg-slate-800"
+                      >
+                        Continue with Mobile
+                        <span className="text-xl">›</span>
+                      </button>
+                      <div className="mt-3 text-center px-2">
+                        <p className="text-xs font-bold text-slate-600">Website Booking</p>
+                        <p className="mt-0.5 text-[11px] text-slate-400 font-medium leading-tight">Save your profile & book faster next time</p>
+                      </div>
                     </div>
+
+                    {/* Right: WhatsApp */}
+                    <div className="flex flex-col">
+                      <button
+                        type="button"
+                        onClick={() => setShowWhatsAppForm(true)}
+                        className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 text-base font-bold text-white shadow-md transition hover:bg-[#1ebe5d]"
+                      >
+                        Book on WhatsApp
+                        <span className="text-xl">›</span>
+                      </button>
+                      <div className="mt-3 text-center px-2">
+                        <p className="text-xs font-bold text-emerald-600">WhatsApp Booking</p>
+                        <p className="mt-0.5 text-[11px] text-emerald-500 font-medium leading-tight">Fastest checkout without login</p>
+                      </div>
+                    </div>
+
                   </div>
 
-                  {/* Right: WhatsApp */}
-                  <div className="flex flex-col">
-                    <a
-                      href={`https://wa.me/917075170769?text=${encodeURIComponent("Hi Srimuni Hotels, I want to book a Fresh Up Room.\nDate: \nTime: \nDuration: \nPax: \nPayment: Pay at Hotel")}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 text-base font-bold text-white shadow-md transition hover:bg-[#1ebe5d]"
-                    >
-                      Book on WhatsApp
-                      <span className="text-xl">›</span>
-                    </a>
-                    <div className="mt-3 text-center px-2">
-                      <p className="text-xs font-bold text-emerald-600">WhatsApp Booking</p>
-                      <p className="mt-0.5 text-[11px] text-emerald-500 font-medium leading-tight">Chat directly & confirm instantly</p>
-                    </div>
+                  <div className="relative flex items-center justify-center mt-6 mb-4">
+                     <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
+                     <div className="relative bg-white px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">OR</div>
                   </div>
 
+                  <button
+                    type="button"
+                    onClick={handleGuestContinue}
+                    className="h-14 w-full rounded-2xl border-2 border-slate-200 bg-white text-base font-bold text-slate-700 transition hover:bg-slate-50"
+                  >
+                    Continue as Guest
+                  </button>
                 </div>
-
-                <div className="relative flex items-center justify-center mt-6 mb-4">
-                   <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
-                   <div className="relative bg-white px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">OR</div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleGuestContinue}
-                  className="h-14 w-full rounded-2xl border-2 border-slate-200 bg-white text-base font-bold text-slate-700 transition hover:bg-slate-50"
-                >
-                  Continue as Guest
-                </button>
-              </div>
+              )}
            </div>
 
            {/* Footer Trust Section */}
