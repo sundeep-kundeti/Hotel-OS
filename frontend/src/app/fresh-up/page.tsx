@@ -10,7 +10,7 @@ export default async function GuestFreshUpRoute() {
   return (
     <>
       <GlobalNavbar isAuthenticated={isAuthenticated} />
-      <GuestFreshUpPage />
+      <GuestFreshUpPage isAuthenticated={isAuthenticated} />
     </>
   );
 }

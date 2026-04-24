@@ -27,9 +27,16 @@ export async function POST(req: Request) {
         'Authorization': `Bearer ${supabaseKey}`
       }
     });
+    
+    if (!roleRes.ok) {
+        const errText = await roleRes.text();
+        console.error('Error fetching admin_users:', errText);
+        return NextResponse.json({ error: 'Database verification failed (Admin)' }, { status: 500 });
+    }
+    
     const roleData = await roleRes.json();
     
-    if (roleData && roleData.length > 0) {
+    if (roleData && Array.isArray(roleData) && roleData.length > 0) {
         if (roleData[0].password_hash && roleData[0].password_hash !== hashedAttempt) {
             return NextResponse.json({ error: 'Incorrect Database Password' }, { status: 401 });
         }
@@ -44,8 +51,14 @@ export async function POST(req: Request) {
         }
     });
 
+    if (!guestRes.ok) {
+        const errText = await guestRes.text();
+        console.error('Error fetching guests:', errText);
+        return NextResponse.json({ error: 'Database verification failed (Guests)' }, { status: 500 });
+    }
+
     const guestData = await guestRes.json();
-    if (guestData && guestData.length > 0) {
+    if (guestData && Array.isArray(guestData) && guestData.length > 0) {
         if (guestData[0].password_hash && guestData[0].password_hash !== hashedAttempt) {
             return NextResponse.json({ error: 'Incorrect Database Password' }, { status: 401 });
         }
@@ -86,6 +99,7 @@ async function issueSecureToken(phone: string, role: string) {
        maxAge: 60 * 10 // 10 Minutes
     });
 
+    return NextResponse.json({ success: true, status: 'authenticated', role });
 }
 
 async function computeHash(password: string): Promise<string> {

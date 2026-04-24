@@ -34,6 +34,21 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
 
   const [mockBookings, setMockBookings] = useState<ManagerBookingTableRow[]>([]);
   const [loadingBookings, setLoadingBookings] = useState(false);
+  
+  const [whatsappLeads, setWhatsappLeads] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchLeads = async () => {
+      try {
+        const res = await fetch('/api/whatsapp/leads');
+        if (res.ok) {
+           const data = await res.json();
+           setWhatsappLeads(data.leads || []);
+        }
+      } catch (err) {}
+    }
+    fetchLeads();
+  }, []);
 
   useEffect(() => {
     const fetchManagerBookings = async () => {
@@ -212,6 +227,40 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
            selectedDate={selectedDate} searchText={searchText} selectedStatus={selectedStatus}
            onDateChange={setSelectedDate} onSearchChange={setSearchText} onStatusChange={setSelectedStatus} onRoomChange={() => {}}
         />
+
+        {whatsappLeads.length > 0 && (
+          <div className="mb-8">
+            <h2 className="text-xl font-extrabold text-slate-800 mb-4 flex items-center gap-2">
+               <span className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse"></span>
+               WhatsApp Booking Leads
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {whatsappLeads.map((lead: any) => (
+                <div key={lead.id || lead.wa_message_id} className="bg-white border-2 border-emerald-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+                   <div className="flex justify-between items-start mb-3">
+                     <span className="bg-emerald-50 text-emerald-700 text-[10px] uppercase font-black tracking-wider px-2 py-1 rounded-md">New Lead</span>
+                     <span className="text-xs text-slate-400 font-bold">{new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                   </div>
+                   <h3 className="font-bold text-slate-800 text-lg">{lead.customer_name || 'Guest'}</h3>
+                   <p className="text-slate-500 font-medium text-sm mb-4">+{lead.customer_mobile || 'Hidden'}</p>
+                   
+                   <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 mb-4 text-xs font-medium text-slate-600 line-clamp-3">
+                     "{lead.raw_message}"
+                   </div>
+                   
+                   <div className="flex gap-2">
+                     <button className="flex-1 bg-[#1A1D20] text-white font-bold text-xs py-2.5 rounded-lg active:scale-95 transition-transform">
+                       Accept & Create
+                     </button>
+                     <button className="px-4 bg-white border border-slate-200 text-slate-600 font-bold text-xs py-2.5 rounded-lg active:scale-95 transition-transform">
+                       Dismiss
+                     </button>
+                   </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         
         <LiveScheduleBoard roomSchedules={liveRooms} onViewBooking={setActiveBookingId} onQuickAction={() => {}} />
         

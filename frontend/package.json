@@ -13,6 +13,7 @@
     "@types/react-datepicker": "^7.0.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.4.2",
     "india-state-district": "^1.0.5",
     "lucide-react": "^0.577.0",
     "next": "16.1.6",

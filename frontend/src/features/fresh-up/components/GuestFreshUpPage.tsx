@@ -13,9 +13,10 @@ import { getLocalISTDate, getLocalISTTime } from '../services/freshUp.time';
 import { calculateFreshUpPrice } from '../services/freshUp.pricing';
 export interface GuestFreshUpPageProps {
   initialDate?: string;
+  isAuthenticated?: boolean;
 }
 
-export default function GuestFreshUpPage({ initialDate }: GuestFreshUpPageProps) {
+export default function GuestFreshUpPage({ initialDate, isAuthenticated }: GuestFreshUpPageProps) {
   const [selectedDate, setSelectedDate] = useState(initialDate || getLocalISTDate());
   const [selectedPax, setSelectedPax] = useState<1 | 2>(1);
   const [selectedDuration, setSelectedDuration] = useState<1 | 2 | 3>(1);
@@ -125,8 +126,11 @@ export default function GuestFreshUpPage({ initialDate }: GuestFreshUpPageProps)
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans pb-32">
-      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 lg:gap-12">
+    <div 
+      className="min-h-screen p-4 md:p-8 font-sans pb-32 relative bg-slate-100/85 bg-blend-overlay bg-cover bg-center bg-no-repeat bg-fixed"
+      style={{ backgroundImage: "url('/fresh-up-bg.jpg')" }}
+    >
+      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-8 lg:gap-12 relative z-10">
         
         {/* Left Column: UI Form Elements */}
         <div className="flex-1 space-y-8">
