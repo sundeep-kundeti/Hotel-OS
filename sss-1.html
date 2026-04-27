@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ALT – QR Booking (Plain JS)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>button:focus{outline:none}</style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <div class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl p-5 sm:p-8">
+      <header class="mb-6 text-center">
+        <h1 id="hotelName" class="text-2xl font-bold tracking-tight">ALT Refresh Pods — Hotel Sri Sathya Sai</h1>
+        <p class="text-sm text-gray-600">Scan → Select → Pay (UPI)</p>
+      </header>
+
+      <div class="space-y-5">
+        <!-- Room Type (kept simple dropdown) -->
+        <div>
+          <label class="block text-sm font-medium mb-2">Room type</label>
+          <select id="room" class="w-full rounded-xl border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+            <option value="freshup">Fresh‑up Pod</option>
+            <option value="standard">Standard Room</option>
+            <option value="deluxe">Deluxe Room</option>
+          </select>
+          <p class="mt-2 text-xs text-gray-500">Pricing: ₹800/hr base, +₹200/hr up to 3 hrs (max ₹1,200/hr). Total capped at ₹2,400 incl. taxes.</p>
+        </div>
+
+        <!-- Hours Toggle -->
+        <div>
+          <label class="block text-sm font-medium mb-2">Duration</label>
+          <div class="flex flex-wrap gap-2" id="hoursButtons"></div>
+          <p id="hoursError" class="hidden text-xs text-red-600 mt-2"></p>
+        </div>
+
+        <!-- Optional Guest Info -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1">Your name (optional)</label>
+            <input id="guestName" class="w-full rounded-xl border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Kishan R." />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Phone (optional)</label>
+            <input id="phone" inputmode="tel" class="w-full rounded-xl border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 9xxxxxxxxx" />
+          </div>
+        </div>
+
+        <!-- Price Summary -->
+        <div class="bg-gray-50 rounded-2xl border border-gray-200 p-4">
+          <div class="flex items-center justify-between text-sm"><span>Rate / hr</span><span id="rate"></span></div>
+          <div class="flex items-center justify-between text-sm mt-1"><span>Subtotal</span><span id="subtotal"></span></div>
+          <div class="flex items-center justify-between text-sm mt-1"><span>Tax (<span id="taxPct"></span>%)</span><span id="tax"></span></div>
+          <div class="border-t mt-3 pt-3 flex items-center justify-between font-semibold">
+            <span>Total</span><span id="total" class="text-lg"></span>
+          </div>
+          <div class="mt-2 text-xs text-gray-500">(Total is capped at ₹2,400 incl. taxes)</div>
+        </div>
+
+        <!-- Pay Button -->
+        <button id="pay" class="w-full py-3 rounded-2xl bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700 active:bg-indigo-800 focus:ring-4 focus:ring-indigo-300">Proceed to Payment (UPI)</button>
+
+        <ul class="text-xs text-gray-500 list-disc pl-5 space-y-1">
+          <li>UPI opens in your payment app (on mobile). On desktop, copy the link to your phone.</li>
+          <li>Show the paid screen at the desk to receive room keys.</li>
+          <li>If UPI fails, pay at desk — your selection is saved for faster check‑in.</li>
+        </ul>
+      </div>
+
+      <footer class="mt-6 text-center text-xs text-gray-400">© <span id="year"></span> <span id="hotelNameFoot"></span></footer>
+    </div>
+  </div>
+
+  <script>
+    // ====== CONFIG ======
+    const CONFIG = {
+      hotelName: "ALT Refresh Pods — Hotel Sri Sathya Sai",
+      currency: "INR",
+      taxesPct: 12, // change if needed
+      upi: {
+        vpa: "altsrisathya@ibl", // <-- CHANGE to your UPI VPA
+        payeeName: "ALT Hotels",
+        enabled: true,
+      },
+      allowedHours: [1, 2, 3, 6, 12, 24],
+      priceCap: 2400, // TOTAL cap including taxes
+    };
+
+    // ====== UTIL ======
+    function currencyFormat(n, currency = CONFIG.currency) {
+      try { return new Intl.NumberFormat("en-IN", { style: "currency", currency }).format(n); }
+      catch { return `${currency} ${Number(n).toFixed(2)}`; }
+    }
+
+    function ratePerHour(hours) {
+      const h = Math.max(1, Number(hours) || 1);
+      return 800 + 200 * Math.min(h - 1, 2); // 800, 1000, 1200 (cap after 3 hrs)
+    }
+
+    function computePrice(hours) {
+      const h = Math.max(1, Number(hours) || 1);
+      const rph = ratePerHour(h);
+      const subtotal = rph * h;
+      const gst = CONFIG.taxesPct ? (subtotal * CONFIG.taxesPct) / 100 : 0;
+      const totalBeforeCap = subtotal + gst;
+      const cap = CONFIG.priceCap || Infinity; // cap applies to TOTAL (incl. taxes)
+      const total = Math.min(totalBeforeCap, cap);
+      const capApplied = Math.max(0, totalBeforeCap - total);
+      return { h, rph, subtotal, gst, totalBeforeCap, capApplied, total };
+    }
+
+    function makeUPILink({ amount, note, vpa, payeeName }) {
+      const params = new URLSearchParams({ pa: vpa, pn: payeeName || CONFIG.hotelName, am: amount.toFixed(2), cu: "INR", tn: note, tr: `ALT-${Date.now()}` });
+      return `upi://pay?${params.toString()}`;
+    }
+
+    // ====== DOM ======
+    const roomEl = document.getElementById('room');
+    const hoursButtonsEl = document.getElementById('hoursButtons');
+    const hoursErrorEl = document.getElementById('hoursError');
+    const guestNameEl = document.getElementById('guestName');
+    const phoneEl = document.getElementById('phone');
+    const rateEl = document.getElementById('rate');
+    const subtotalEl = document.getElementById('subtotal');
+    const taxPctEl = document.getElementById('taxPct');
+    const taxEl = document.getElementById('tax');
+    const totalEl = document.getElementById('total');
+    const payBtn = document.getElementById('pay');
+
+    document.getElementById('hotelName').textContent = CONFIG.hotelName;
+    document.getElementById('hotelNameFoot').textContent = CONFIG.hotelName;
+    document.getElementById('year').textContent = new Date().getFullYear();
+    taxPctEl.textContent = CONFIG.taxesPct;
+
+    let selectedHours = CONFIG.allowedHours[0];
+
+    function renderHoursButtons() {
+      if (!hoursButtonsEl) { return; }
+      hoursButtonsEl.innerHTML = '';
+      CONFIG.allowedHours.forEach(h => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = h + ' hr' + (h > 1 ? 's' : '');
+        b.className = 'px-4 py-2 rounded-full border transition ' + (selectedHours === h ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-200');
+        b.addEventListener('click', () => { selectedHours = h; renderHoursButtons(); refreshPrice(); });
+        hoursButtonsEl.appendChild(b);
+      });
+      hoursErrorEl.classList.add('hidden');
+    }
+
+    function refreshPrice() {
+      const p = computePrice(selectedHours);
+      rateEl.textContent = currencyFormat(p.rph) + '/hr';
+      subtotalEl.textContent = currencyFormat(p.subtotal);
+      taxEl.textContent = currencyFormat(p.gst);
+      totalEl.textContent = currencyFormat(p.total);
+    }
+
+    if (!hoursButtonsEl) {
+      hoursErrorEl.textContent = 'Hours UI failed to render. Check that the element with id="hoursButtons" exists.';
+      hoursErrorEl.classList.remove('hidden');
+    } else {
+      renderHoursButtons();
+      refreshPrice();
+    }
+
+    payBtn.addEventListener('click', () => {
+      const amount = computePrice(selectedHours).total; // exact, after cap
+      if (!CONFIG.upi.enabled || !CONFIG.upi.vpa) { alert('Payment not enabled / VPA missing'); return; }
+      const note = `${CONFIG.hotelName} · ${roomEl.options[roomEl.selectedIndex].text} · ${selectedHours}hr${selectedHours>1?'s':''}`;
+      const link = makeUPILink({ amount, note, vpa: CONFIG.upi.vpa, payeeName: CONFIG.upi.payeeName });
+      window.location.href = link;
+      try {
+        localStorage.setItem('qr-booking-latest', JSON.stringify({
+          guestName: guestNameEl.value, phone: phoneEl.value,
+          room: roomEl.value, hours: selectedHours, total: amount, ts: Date.now()
+        }));
+      } catch {}
+    });
+  </script>
+</body>
+</html>

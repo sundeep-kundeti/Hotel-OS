@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Srinivasa Residency — Book & Check-in</title>
+  <meta name="description" content="Srinivasa Residency — Book rooms online, get directions, pay via UPI, or reserve with Pay at Hotel." />
+  <style>
+    :root{
+      --bg:#0b1220;
+      --text:#e9eefc;
+      --muted:#b8c2e2;
+      --line:rgba(255,255,255,.10);
+      --ok:#37d399;
+      --bad:#ff6b6b;
+      --shadow: 0 18px 60px rgba(0,0,0,.35);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(122,167,255,.25), transparent 60%),
+        radial-gradient(900px 600px at 85% 20%, rgba(55,211,153,.16), transparent 55%),
+        linear-gradient(180deg, #070b16, var(--bg));
+      color:var(--text);
+      min-height:100vh;
+    }
+    .wrap{max-width:980px;margin:0 auto;padding:24px 16px 48px;}
+    header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:14px 14px 22px;}
+    .brand{display:flex;gap:12px;align-items:center;}
+    .logo{width:44px;height:44px;border-radius:14px;background: linear-gradient(135deg, rgba(122,167,255,.95), rgba(55,211,153,.85));box-shadow: 0 14px 30px rgba(122,167,255,.20);}
+    .title{line-height:1.1;}
+    .title h1{font-size:18px;margin:0 0 4px;letter-spacing:.2px;}
+    .title p{margin:0;color:var(--muted);font-size:13px;}
+    .badge{border:1px solid var(--line);background: rgba(255,255,255,.04);padding:8px 10px;border-radius:999px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;white-space:nowrap;}
+    .dot{width:8px;height:8px;border-radius:99px;background:var(--ok);box-shadow:0 0 0 4px rgba(55,211,153,.12)}
+    .grid{display:grid;grid-template-columns: 1.2fr .8fr;gap:16px;}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card .head{padding:18px 18px 0;}
+    .card .head h2{margin:0 0 6px;font-size:18px;letter-spacing:.2px;}
+    .card .head p{margin:0 0 14px;color:var(--muted);font-size:13px;}
+    .actions{display:grid;grid-template-columns:1fr;gap:10px;padding:0 18px 18px;}
+    .btn{
+      border:none;border-radius:14px;padding:14px 14px;font-weight:800;cursor:pointer;
+      transition:.15s transform ease, .15s opacity ease;
+      display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;
+    }
+    .btn:active{transform:scale(.99)}
+    .btn.primary{background: linear-gradient(135deg, rgba(122,167,255,.95), rgba(122,167,255,.65));color:#071022;}
+    .btn.secondary{background: rgba(255,255,255,.06);color:var(--text);border:1px solid var(--line);}
+    .btn.success{background: linear-gradient(135deg, rgba(55,211,153,.92), rgba(55,211,153,.65));color:#06150f;}
+    .btn small{display:block;font-weight:650;opacity:.9}
+    .btn span.right{opacity:.9}
+    .side{padding:18px;}
+    .side h3{margin:0 0 10px;font-size:14px;letter-spacing:.2px}
+    .info{border:1px solid var(--line);border-radius:16px;background: rgba(255,255,255,.03);padding:12px;margin-bottom:12px;}
+    .info .row{display:flex;justify-content:space-between;gap:10px;padding:6px 0;font-size:13px;border-bottom:1px dashed rgba(255,255,255,.08);}
+    .info .row:last-child{border-bottom:none}
+    .muted{color:var(--muted)}
+    .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;background: rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted);font-size:12px;}
+
+    .panel{padding:18px;border-top:1px solid var(--line);background: rgba(0,0,0,.18);display:none;}
+    .panel.active{display:block}
+    .form{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    @media (max-width:680px){.form{grid-template-columns:1fr}}
+    label{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;}
+    input, select, textarea{
+      width:100%;padding:12px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);color:var(--text);outline:none;
+    }
+    input:focus, select:focus, textarea:focus{border-color: rgba(122,167,255,.8);box-shadow:0 0 0 4px rgba(122,167,255,.18);}
+    textarea{min-height:84px;resize:vertical}
+    .full{grid-column:1/-1}
+    .form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;}
+    .note{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.4;}
+    .alert{display:none;margin-top:12px;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background: rgba(255,255,255,.04);font-size:13px;color:var(--muted);}
+    .alert.show{display:block}
+    .tiny{font-size:11px;color:rgba(233,238,252,.60);}
+    .divider{height:1px;background:rgba(255,255,255,.10);margin:12px 0;}
+    .choice{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px;}
+    .pricebox{
+      margin-top:10px;
+      padding:12px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      font-size:13px;
+    }
+    .pricegrid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:6px;
+      width:100%;
+    }
+    .pricegrid .row{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      color:rgba(233,238,252,.90);
+    }
+    .pricegrid .row span:first-child{color:var(--muted)}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div class="title">
+          <h1>Srinivasa Residency</h1>
+          <p>Directions • Booking • UPI or Pay at Hotel • Fast check-in</p>
+        </div>
+      </div>
+      <div class="badge" title="Online booking available">
+        <span class="dot"></span>
+        Open for bookings
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <div class="head">
+          <h2>Book a room or check-in in minutes</h2>
+          <p>Choose an option below. Clear steps. No confusion.</p>
+        </div>
+
+        <div class="actions">
+          <button class="btn secondary" id="btnDirections" type="button">
+            <div>Directions <small class="muted">Open Google Maps to reach us</small></div>
+            <span class="right">↗</span>
+          </button>
+
+          <button class="btn primary" id="btnBook" type="button">
+            <div>Book Rooms <small class="muted">Select booking type + room type + guests + check-in</small></div>
+            <span class="right">→</span>
+          </button>
+
+          <button class="btn success" id="btnCheckin" type="button">
+            <div>Check-in <small class="muted">Submit details for faster processing</small></div>
+            <span class="right">✓</span>
+          </button>
+        </div>
+
+        <!-- BOOK PANEL -->
+        <div class="panel" id="panelBook">
+          <h3 style="margin:0 0 10px;font-size:14px;">Booking Details</h3>
+
+          <form id="bookForm" novalidate>
+            <div class="form">
+
+              <div>
+                <label for="customerName">Customer Name</label>
+                <input id="customerName" type="text" placeholder="Full name" required />
+              </div>
+
+              <div>
+                <label for="customerEmail">Email (confirmation will be sent here)</label>
+                <input id="customerEmail" type="email" placeholder="name@gmail.com" required />
+              </div>
+
+              <div>
+                <label for="phoneBook">Phone Number</label>
+                <input id="phoneBook" type="tel" inputmode="tel" placeholder="10-digit mobile number" required />
+              </div>
+
+              <div>
+                <label for="bookingType">Booking Type</label>
+                <select id="bookingType" required>
+                  <option value="">Select</option>
+                  <option value="REGULAR_11AM">Regular</option>
+                  <option value="FRESH_UP">Fresh Up (1–2 hours)</option>
+                </select>
+              </div>
+
+              <div id="freshupWrap" style="display:none;">
+                <label for="freshupHours">Fresh Up Hours</label>
+                <select id="freshupHours">
+                  <option value="">Select</option>
+                  <option value="1">1 hour (₹200)</option>
+                  <option value="2">2 hours (₹400)</option>
+                </select>
+              </div>
+
+              <div id="checkoutOptionWrap" style="display:none;">
+                <label for="checkoutOption">Checkout Option</label>
+                <select id="checkoutOption">
+                  <option value="STANDARD_11AM">Standard (Checkout next day 11:00 AM)</option>
+                  <option value="HOURS_24">24 Hours from check-in (+₹100)</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="roomType">Room Type</label>
+                <select id="roomType" required>
+                  <option value="">Select</option>
+                  <option value="AC">AC</option>
+                  <option value="NON_AC">Non-AC</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="guests">Number of People</label>
+                <select id="guests" required>
+                  <option value="">Select</option><option>1</option><option>2</option><option>3</option><option>4</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="coupon">Coupon Code (optional)</label>
+                <input id="coupon" type="text" placeholder="Enter coupon code if you have one" />
+              </div>
+
+              <div>
+                <label for="checkinDate">Check-in Date</label>
+                <input id="checkinDate" type="date" required />
+              </div>
+
+              <div>
+                <label for="checkinTime">Check-in Time</label>
+                <input id="checkinTime" type="time" required />
+              </div>
+
+              <div class="full">
+                <div class="pricebox">
+                  <div class="pricegrid">
+                    <div class="row"><span>Checkout</span><strong id="checkoutDisplay">—</strong></div>
+                    <div class="row"><span>Amount</span><strong id="priceDisplay">₹—</strong></div>
+                    <div class="row"><span>Email Status</span><strong id="emailDisplay">—</strong></div>
+                  </div>
+                </div>
+                <div class="tiny muted" style="margin-top:6px;">
+                  *Email will be sent after you choose Pay at Hotel or confirm UPI payment.
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn primary" type="submit" style="justify-content:center;">Continue</button>
+              <button class="btn secondary" type="button" id="btnBookClose" style="justify-content:center;">Close</button>
+            </div>
+
+            <div class="note">
+              Continue will generate your booking ID + final amount. Then choose UPI or Pay at Hotel.
+            </div>
+
+            <div class="alert" id="bookAlert"></div>
+
+            <div id="paymentChoices" style="display:none;">
+              <div class="divider"></div>
+              <h3 style="margin:0 0 10px;font-size:14px;">Payment</h3>
+
+              <div class="choice">
+                <button class="btn success" type="button" id="btnUpiPay">
+                  <div>Pay with UPI Apps <small class="muted">Final amount auto-filled</small></div>
+                  <span class="right">₹</span>
+                </button>
+
+                <!-- iPhone chooser to avoid WhatsApp hijack -->
+                <div id="iosUpiChooser" style="display:none;">
+                  <div class="divider"></div>
+                  <div class="tiny muted" style="margin-bottom:8px;">Choose UPI App (iPhone)</div>
+
+                  <button class="btn secondary" type="button" id="btnGpay">
+                    <div>Open Google Pay</div><span class="right">↗</span>
+                  </button>
+                  <button class="btn secondary" type="button" id="btnPhonePe">
+                    <div>Open PhonePe</div><span class="right">↗</span>
+                  </button>
+                  <button class="btn secondary" type="button" id="btnPaytm">
+                    <div>Open Paytm</div><span class="right">↗</span>
+                  </button>
+                  <button class="btn secondary" type="button" id="btnBhim">
+                    <div>Open BHIM</div><span class="right">↗</span>
+                  </button>
+
+                  <div class="note tiny">If an app is not installed, it may not open.</div>
+                </div>
+
+                <!-- show after UPI opens -->
+                <button class="btn secondary" type="button" id="btnUpiPaid" style="display:none;">
+                  <div>I have paid (Confirm) <small class="muted">Sends confirmation email</small></div>
+                  <span class="right">✓</span>
+                </button>
+
+                <button class="btn secondary" type="button" id="btnReservePayHotel">
+                  <div>Reserve (Pay at Hotel) <small class="muted">Sends confirmation email now</small></div>
+                  <span class="right">✓</span>
+                </button>
+              </div>
+
+              <div class="note tiny">UPI is optional. You can reserve now and pay at reception.</div>
+            </div>
+          </form>
+        </div>
+
+        <!-- CHECK-IN PANEL -->
+        <div class="panel" id="panelCheckin">
+          <h3 style="margin:0 0 10px;font-size:14px;">Check-in Details</h3>
+
+          <form id="checkinForm" novalidate>
+            <div class="form">
+              <div>
+                <label for="custName">Customer Name</label>
+                <input id="custName" type="text" placeholder="Full name" required />
+              </div>
+
+              <div>
+                <label for="phoneCheckin">Phone Number</label>
+                <input id="phoneCheckin" type="tel" inputmode="tel" placeholder="10-digit mobile number" required />
+              </div>
+
+              <div class="full">
+                <label for="address">Address</label>
+                <textarea id="address" placeholder="House/Street, Area, City, State, PIN" required></textarea>
+              </div>
+
+              <div>
+                <label for="roomNo">Room Number</label>
+                <input id="roomNo" type="text" placeholder="e.g., 203" required />
+              </div>
+
+              <div>
+                <label for="stayLength">Length of Stay</label>
+                <select id="stayLength" required>
+                  <option value="">Select</option>
+                  <option value="2_hours">2 Hours</option>
+                  <option value="3_hours">3 Hours</option>
+                  <option value="6_hours">6 Hours</option>
+                  <option value="12_hours">12 Hours</option>
+                  <option value="overnight">Overnight</option>
+                  <option value="1_day">1 Day</option>
+                  <option value="2_days">2 Days</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn success" type="submit" style="justify-content:center;">Submit Check-in</button>
+              <button class="btn secondary" type="button" id="btnCheckinClose" style="justify-content:center;">Close</button>
+            </div>
+
+            <div class="note">Final verification may still be required at reception as per policy.</div>
+            <div class="alert" id="checkinAlert"></div>
+          </form>
+        </div>
+      </section>
+
+      <aside class="card">
+        <div class="side">
+          <h3>Hotel Details</h3>
+          <div class="info">
+            <div class="row"><span class="muted">Property</span><span>Srinivasa Residency</span></div>
+            <div class="row"><span class="muted">Website</span><span>srimunihotels.com</span></div>
+            <div class="row"><span class="muted">Payment</span><span>UPI / Pay at Hotel</span></div>
+            <div class="row"><span class="muted">Pricing</span><span>Fresh Up ₹200/hr • Regular (11AM / 24H)</span></div>
+          </div>
+
+          <div class="pill">✅ Booking ID generated</div><div style="height:10px"></div>
+          <div class="pill">📧 Email sent after payment choice</div><div style="height:10px"></div>
+          <div class="pill">📍 Exact directions via Google Maps</div>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="tiny" style="margin-top:14px;">
+      © <span id="year"></span> Srinivasa Residency • A Srimuni Hotels property
+    </footer>
+  </div>
+
+  <script>
+    // ===== CONFIG =====
+    const GOOGLE_MAPS_URL = "https://maps.app.goo.gl/AzmAd1D8TjEqqjSw9";
+    const UPI_ID = "srimunihotelsandhospitalityservicesprivatelimited.ibz@icici";
+    const PAYEE_NAME = "Srinivasa Residency";
+    const SHEETS_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxT9derhL8uUBpVMbWNOBp01V2toPQANp_B6JeNCAZZpbNI8vEn0CiuOE9LpjLvLl1XuA/exec";
+    const THANKYOU_URL = "/thankyou.html";
+
+    // ===== HELPERS =====
+    const $ = (id) => document.getElementById(id);
+    const panelBook = $("panelBook");
+    const panelCheckin = $("panelCheckin");
+    const paymentChoices = $("paymentChoices");
+
+    function isIOS(){
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+
+    function buildUpiParams({ pa, pn, am, tn }) {
+      const params = new URLSearchParams();
+      params.set("pa", pa);
+      params.set("pn", pn);
+      params.set("am", String(am));
+      params.set("cu", "INR");
+      params.set("tn", tn);
+      return params.toString();
+    }
+
+    function buildAndroidUpiLink(paramsString) {
+      return `upi://pay?${paramsString}`;
+    }
+
+    function buildIosUpiLinks(paramsString) {
+      return {
+        gpay:   `gpay://upi/pay?${paramsString}`,
+        phonepe:`phonepe://pay?${paramsString}`,
+        paytm:  `paytmmp://pay?${paramsString}`,
+        bhim:   `bhim://pay?${paramsString}`,
+      };
+    }
+
+    function showPanel(which){
+      panelBook.classList.remove("active");
+      panelCheckin.classList.remove("active");
+      if(which === "book") panelBook.classList.add("active");
+      if(which === "checkin") panelCheckin.classList.add("active");
+      setTimeout(() => (which === "book" ? panelBook : panelCheckin).scrollIntoView({behavior:"smooth", block:"start"}), 50);
+    }
+    function hidePanels(){
+      panelBook.classList.remove("active");
+      panelCheckin.classList.remove("active");
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    function isValidPhone(p){
+      const digits = (p || "").replace(/\D/g, "");
+      return digits.length >= 10 && digits.length <= 13;
+    }
+    function isValidEmail(e){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e||"").trim());
+    }
+
+    function setAlert(el, msg, type){
+      el.classList.add("show");
+      el.style.borderColor = type === "bad" ? "rgba(255,107,107,.55)" : "rgba(55,211,153,.55)";
+      el.style.background = type === "bad" ? "rgba(255,107,107,.08)" : "rgba(55,211,153,.08)";
+      el.style.color = type === "bad" ? "rgba(255,210,210,.95)" : "rgba(210,255,238,.95)";
+      el.textContent = msg;
+    }
+    function todayISO(){
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    }
+    function ensureMinDates(){
+      const min = todayISO();
+      $("checkinDate").setAttribute("min", min);
+    }
+
+    function goThankYou(mode, bookingId){
+      window.location.href = `${THANKYOU_URL}?mode=${encodeURIComponent(mode)}&bid=${encodeURIComponent(bookingId || "")}`;
+    }
+
+    async function confirmBooking({ bookingId, paymentMode, paymentStatus }) {
+      const res = await fetch(SHEETS_WEBAPP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "CONFIRM",
+          bookingId,
+          paymentMode,
+          paymentStatus
+        })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Confirm failed");
+      return data;
+    }
+
+    // ===== BUTTONS =====
+    $("btnDirections").addEventListener("click", () => window.open(GOOGLE_MAPS_URL, "_blank", "noopener,noreferrer"));
+    $("btnBook").addEventListener("click", () => showPanel("book"));
+    $("btnCheckin").addEventListener("click", () => showPanel("checkin"));
+    $("btnBookClose").addEventListener("click", hidePanels);
+    $("btnCheckinClose").addEventListener("click", hidePanels);
+
+    // ===== BOOKING TYPE UI =====
+    $("bookingType").addEventListener("change", () => {
+      const type = $("bookingType").value;
+      const isFresh = type === "FRESH_UP";
+      const isRegular = type === "REGULAR_11AM";
+
+      $("freshupWrap").style.display = isFresh ? "block" : "none";
+      $("checkoutOptionWrap").style.display = isRegular ? "block" : "none";
+
+      if (!isFresh) $("freshupHours").value = "";
+      if (!isRegular) $("checkoutOption").value = "STANDARD_11AM";
+
+      $("checkoutDisplay").textContent = "—";
+      $("priceDisplay").textContent = "₹—";
+      $("emailDisplay").textContent = "—";
+      $("btnUpiPaid").style.display = "none";
+      $("iosUpiChooser").style.display = "none";
+      paymentChoices.style.display = "none";
+    });
+
+    // ===== BOOK FLOW =====
+    let lastValidBooking = null;
+
+    $("bookForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const alertBox = $("bookAlert");
+      alertBox.classList.remove("show");
+      paymentChoices.style.display = "none";
+      $("btnUpiPaid").style.display = "none";
+      $("iosUpiChooser").style.display = "none";
+
+      ensureMinDates();
+
+      const customerName = $("customerName").value.trim();
+      const customerEmail = $("customerEmail").value.trim();
+      const phone = $("phoneBook").value.trim();
+      const bookingType = $("bookingType").value.trim();
+      const roomType = $("roomType").value.trim();
+      const roomTypeLabel = roomType === "AC" ? "AC" : (roomType === "NON_AC" ? "Non-AC" : "");
+      const guests = $("guests").value.trim();
+      const cinD = $("checkinDate").value;
+      const cinT = $("checkinTime").value;
+      const coupon = $("coupon").value.trim();
+
+      if(!customerName) return setAlert(alertBox, "Please enter customer name.", "bad");
+      if(!isValidEmail(customerEmail)) return setAlert(alertBox, "Please enter a valid email for confirmation.", "bad");
+      if(!isValidPhone(phone)) return setAlert(alertBox, "Please enter a valid phone number.", "bad");
+      if(!bookingType) return setAlert(alertBox, "Please select booking type.", "bad");
+      if(!roomType) return setAlert(alertBox, "Please select room type.", "bad");
+      if(!guests) return setAlert(alertBox, "Please select number of people.", "bad");
+      if(!cinD || !cinT) return setAlert(alertBox, "Please select check-in date/time.", "bad");
+
+      const min = todayISO();
+      if(cinD < min) return setAlert(alertBox, "Past dates are not allowed. Please select today or future dates.", "bad");
+
+      let freshupHours = undefined;
+      if (bookingType === "FRESH_UP") {
+        const h = $("freshupHours").value.trim();
+        if(!h) return setAlert(alertBox, "Please select Fresh Up hours (1 or 2).", "bad");
+        freshupHours = Number(h);
+      }
+
+      const checkoutOption = (bookingType === "REGULAR_11AM")
+        ? $("checkoutOption").value.trim()
+        : undefined;
+
+      lastValidBooking = {
+        property: "Srinivasa Residency",
+        bookingId: "",
+        customerName,
+        customerEmail,
+        phone,
+        bookingType,
+        checkoutOption,
+        freshupHours,
+        roomType,
+        roomTypeLabel,
+        guests,
+        checkinDate: cinD,
+        checkinTime: cinT,
+        coupon,
+        amount: null,
+        checkoutDate: "",
+        checkoutTime: ""
+      };
+
+      try {
+        setAlert(alertBox, "Creating booking ID…", "ok");
+        $("emailDisplay").textContent = "Not sent yet";
+
+        const payload = {
+          action: "CREATE",
+          property: lastValidBooking.property,
+          customerName: lastValidBooking.customerName,
+          customerEmail: lastValidBooking.customerEmail,
+          phone: lastValidBooking.phone,
+          bookingType: lastValidBooking.bookingType,
+          roomType: lastValidBooking.roomType,
+          freshupHours: lastValidBooking.freshupHours,
+          checkoutOption: lastValidBooking.checkoutOption,
+          guests: lastValidBooking.guests,
+          checkinDate: lastValidBooking.checkinDate,
+          checkinTime: lastValidBooking.checkinTime,
+          coupon: lastValidBooking.coupon || "",
+          source: "Website",
+          userAgent: navigator.userAgent,
+          notes: ""
+        };
+
+        const res = await fetch(SHEETS_WEBAPP_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || "Unknown error");
+
+        lastValidBooking.bookingId = data.bookingId || "";
+        if (data.quote) {
+          lastValidBooking.amount = data.quote.amount;
+          lastValidBooking.checkoutDate = data.quote.checkoutDate || "";
+          lastValidBooking.checkoutTime = data.quote.checkoutTime || "";
+          lastValidBooking.checkoutOption = data.quote.checkoutOption || lastValidBooking.checkoutOption;
+        }
+
+        const checkoutText = (lastValidBooking.checkoutDate && lastValidBooking.checkoutTime)
+          ? `${lastValidBooking.checkoutDate} ${lastValidBooking.checkoutTime}`
+          : "—";
+
+        $("checkoutDisplay").textContent = checkoutText;
+        $("priceDisplay").textContent = (lastValidBooking.amount != null) ? `₹${lastValidBooking.amount}` : "₹—";
+
+        setAlert(
+          alertBox,
+          `Booking ID created: ${lastValidBooking.bookingId}. Amount ₹${lastValidBooking.amount}. Now choose UPI or Pay at Hotel.`,
+          "ok"
+        );
+
+        paymentChoices.style.display = "block";
+        paymentChoices.scrollIntoView({behavior:"smooth", block:"start"});
+
+      } catch (err) {
+        $("emailDisplay").textContent = "—";
+        setAlert(alertBox, "Could not create booking right now. Please try again.", "bad");
+      }
+    });
+
+    // ✅ UPI: Android opens upi://, iPhone shows chooser so it doesn’t go to WhatsApp
+    $("btnUpiPay").addEventListener("click", () => {
+      const alertBox = $("bookAlert");
+      if(!lastValidBooking?.bookingId) return setAlert(alertBox, "Please press Continue first.", "bad");
+      if(lastValidBooking.amount == null) return setAlert(alertBox, "Amount not available. Please press Continue again.", "bad");
+
+      const tn = `Booking ${lastValidBooking.bookingId} | ${lastValidBooking.roomTypeLabel} | ₹${lastValidBooking.amount} | ${lastValidBooking.checkinDate}`;
+      const params = buildUpiParams({
+        pa: UPI_ID,
+        pn: PAYEE_NAME,
+        am: lastValidBooking.amount,
+        tn
+      });
+
+      // Show confirm button always
+      $("btnUpiPaid").style.display = "flex";
+      $("emailDisplay").textContent = "Pending (confirm after payment)";
+
+      if (isIOS()) {
+        // iPhone: show chooser
+        const links = buildIosUpiLinks(params);
+        $("iosUpiChooser").style.display = "block";
+
+        $("btnGpay").onclick    = () => window.location.href = links.gpay;
+        $("btnPhonePe").onclick = () => window.location.href = links.phonepe;
+        $("btnPaytm").onclick   = () => window.location.href = links.paytm;
+        $("btnBhim").onclick    = () => window.location.href = links.bhim;
+
+        setAlert(alertBox, "Choose your UPI app to pay. After payment, come back and tap “I have paid (Confirm)”.", "ok");
+        return;
+      }
+
+      // Android: open upi://pay
+      window.location.href = buildAndroidUpiLink(params);
+      setAlert(alertBox, "Opening UPI apps… After paying, come back and tap “I have paid (Confirm)”.", "ok");
+    });
+
+    // UPI Paid confirm: send email now + redirect
+    $("btnUpiPaid").addEventListener("click", async () => {
+      const alertBox = $("bookAlert");
+      if(!lastValidBooking?.bookingId) return setAlert(alertBox, "Please press Continue first.", "bad");
+
+      try {
+        $("emailDisplay").textContent = "Sending…";
+        setAlert(alertBox, "Confirming payment & sending email…", "ok");
+
+        await confirmBooking({
+          bookingId: lastValidBooking.bookingId,
+          paymentMode: "UPI",
+          paymentStatus: "PAID"
+        });
+
+        $("emailDisplay").textContent = "Sent ✅";
+        goThankYou("upi", lastValidBooking.bookingId);
+
+      } catch (e) {
+        $("emailDisplay").textContent = "Not sent ⚠️";
+        setAlert(alertBox, "Could not confirm payment / send email. Please try again.", "bad");
+      }
+    });
+
+    // Pay at Hotel confirm: send email immediately + redirect
+    $("btnReservePayHotel").addEventListener("click", async () => {
+      const alertBox = $("bookAlert");
+      if(!lastValidBooking?.bookingId) return setAlert(alertBox, "Please press Continue first.", "bad");
+
+      try {
+        $("emailDisplay").textContent = "Sending…";
+        setAlert(alertBox, "Reserving & sending email…", "ok");
+
+        await confirmBooking({
+          bookingId: lastValidBooking.bookingId,
+          paymentMode: "PAY_AT_HOTEL",
+          paymentStatus: "RESERVED"
+        });
+
+        $("emailDisplay").textContent = "Sent ✅";
+        goThankYou("pay_at_hotel", lastValidBooking.bookingId);
+
+      } catch (e) {
+        $("emailDisplay").textContent = "Not sent ⚠️";
+        setAlert(alertBox, "Could not reserve / send email. Please try again.", "bad");
+      }
+    });
+
+    // ===== CHECK-IN =====
+    $("checkinForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const alertBox = $("checkinAlert");
+      alertBox.classList.remove("show");
+
+      const name = $("custName").value.trim();
+      const phone = $("phoneCheckin").value.trim();
+      const address = $("address").value.trim();
+      const roomNo = $("roomNo").value.trim();
+      const stayLength = $("stayLength").value.trim();
+
+      if(!name) return setAlert(alertBox, "Please enter customer name.", "bad");
+      if(!isValidPhone(phone)) return setAlert(alertBox, "Please enter a valid phone number.", "bad");
+      if(!address) return setAlert(alertBox, "Please enter address.", "bad");
+      if(!roomNo) return setAlert(alertBox, "Please enter room number.", "bad");
+      if(!stayLength) return setAlert(alertBox, "Please select length of stay.", "bad");
+
+      setAlert(alertBox, "Check-in details submitted. Please proceed to reception for final verification.", "ok");
+    });
+
+    // ===== INIT =====
+    $("year").textContent = new Date().getFullYear();
+    ensureMinDates();
+    const t = todayISO();
+    if(!$("checkinDate").value) $("checkinDate").value = t;
+
+    $("freshupWrap").style.display = "none";
+    $("checkoutOptionWrap").style.display = "none";
+
+    // hide chooser initially
+    $("iosUpiChooser").style.display = "none";
+  </script>
+</body>
+</html>

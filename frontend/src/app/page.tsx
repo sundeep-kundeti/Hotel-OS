@@ -1,235 +1,252 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, ChevronRight, User, Mail, Calendar, MapPin, Building2, Phone, ShieldCheck, Clock, Gift, Headset, Lock } from 'lucide-react';
+import Header from './components/Header';
+import Hero from './components/Hero';
+import RoomCard from './components/RoomCard';
+import type { Room } from './components/RoomCard';
+import BookingModal from './components/BookingModal';
+import type { BookingData } from './components/BookingModal';
+import DiscountsSection from './components/DiscountsSection';
+import TirupatiInfo from './components/TirupatiInfo';
+import TirumalaInfo from './components/TirumalaInfo';
+import Footer from './components/Footer';
+import { Phone, MapPin, Headset, CheckCircle2 } from 'lucide-react';
 
-export default function SrimuniSignupPage() {
-  const getMaxDob = () => {
-    const d = new Date();
-    d.setFullYear(d.getFullYear() - 18);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
+export const rooms: Room[] = [
+  {
+    id: '1',
+    name: 'Non-AC Room',
+    description: 'Clean and comfortable budget room with essential amenities. Perfect for pilgrims seeking economical accommodation.',
+    price: 900,
+    capacity: 2,
+    amenities: ['WiFi', 'TV', 'Hot Water'],
+    image: 'https://images.unsplash.com/photo-1629140727571-9b5c6f6267b4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    available: true,
+  },
+  {
+    id: '2',
+    name: 'AC Room',
+    description: 'Comfortable air-conditioned room with modern amenities for a pleasant stay.',
+    price: 1500,
+    capacity: 2,
+    amenities: ['WiFi', 'AC', 'TV', 'Hot Water'],
+    image: 'https://images.unsplash.com/photo-1731336478850-6bce7235e320?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    available: true,
+  },
+  {
+    id: '3',
+    name: 'Deluxe AC Room',
+    description: 'Spacious deluxe room with premium AC and enhanced comfort. Ideal for families and longer stays.',
+    price: 1800,
+    capacity: 3,
+    amenities: ['WiFi', 'AC', 'TV', 'Hot Water', 'Refrigerator'],
+    image: 'https://images.unsplash.com/photo-1776763255122-3d35e32aee64?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    available: true,
+  },
+  {
+    id: '4',
+    name: 'Fresh Up',
+    description: 'Quick refresh facility for a few hours. Ideal for freshening up before or after temple visit.',
+    price: 200,
+    capacity: 2,
+    amenities: ['Hot Water', 'Towels'],
+    image: 'https://images.unsplash.com/photo-1666813721996-42956e40788e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    available: true,
+  },
+  {
+    id: '5',
+    name: 'Short Stay',
+    description: 'Half-day accommodation for short visits. Check-in for 6-12 hours duration.',
+    price: 600,
+    capacity: 2,
+    amenities: ['WiFi', 'TV', 'Hot Water'],
+    image: 'https://images.unsplash.com/photo-1776763255197-495b343d5a33?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
+    available: true,
+  },
+];
 
-  const getToday = () => {
-    const d = new Date();
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  };
-
+export default function HomePage() {
   const router = useRouter();
-  const [showWhatsAppForm, setShowWhatsAppForm] = useState(false);
-  const [waData, setWaData] = useState({ date: getToday(), time: '08:00', duration: '1 Hour', pax: '1 Guest' });
-  const handleGuestContinue = () => {
-      router.push('/fresh-up'); // Bypassing login entirely to view public slots
-  }
+  const [activeSection, setActiveSection] = useState('home');
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = ['home', 'rooms', 'discounts', 'tirupati', 'tirumala', 'contact'];
+      for (const id of sections) {
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= 120 && rect.bottom > 120) {
+            setActiveSection(id);
+            break;
+          }
+        }
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToSection = (sectionId: string) => {
+    setActiveSection(sectionId);
+    const el = document.getElementById(sectionId);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleConfirmBooking = (booking: BookingData) => {
+    setShowConfirmation(true);
+    setTimeout(() => setShowConfirmation(false), 5000);
+  };
 
   return (
-    <div className="min-h-screen flex flex-col-reverse md:flex-row bg-[#F9F9F8] font-sans antialiased text-slate-800">
-      
-      {/* LEFT: BRAND MARKETING PANEL */}
-      <div className="w-full md:w-[45%] lg:w-[50%] bg-[#1A1D20] text-stone-100 flex flex-col p-8 md:p-12 lg:p-20 relative overflow-hidden">
-         {/* Subtle Luxury Gradient Overlay */}
-         <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-br from-[#272B2E] via-[#1A1D20] to-[#121415] opacity-50 pointer-events-none z-0" />
-         <div className="absolute top-0 left-0 w-full h-[400px] bg-gradient-to-br from-[#D4AF37]/10 to-transparent pointer-events-none z-0" />
+    <div className="min-h-screen bg-slate-50">
+      <Header activeSection={activeSection} onNavigate={scrollToSection} />
 
-         <div className="relative z-10 flex-1 flex flex-col">
-            <div className="mb-16">
-               <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-sm bg-gradient-to-tr from-[#D4AF37] to-[#F3E5AB] flex items-center justify-center text-[#1A1D20]">
-                     <Building2 size={20} strokeWidth={2.5} />
-                  </div>
-                  <span className="text-2xl font-black tracking-tight text-white">Srimuni Hotels</span>
-               </div>
-               <p className="mt-3 text-stone-400 font-medium tracking-wide text-sm uppercase">Comfortable stays. Faster booking. Direct hospitality.</p>
-            </div>
-
-            <div className="mb-12 max-w-lg">
-                <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-[1.1] tracking-tight mb-6">
-                   Stay better with<br/>Srimuni Hotels.
-                </h1>
-                <p className="text-stone-300 text-lg leading-relaxed mix-blend-screen opacity-90">
-                   Create your guest account to enjoy faster bookings, easier repeat stays, and exclusive direct-guest offers designed entirely for Tirupati travelers.
-                </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-auto mb-12">
-               <div className="bg-[#24282B]/60 backdrop-blur-md rounded-2xl p-5 border border-white/5 shadow-xl transition-transform hover:-translate-y-1">
-                  <Clock className="text-[#D4AF37] mb-3" size={24} />
-                  <h3 className="font-bold text-white mb-1">Faster repeat booking</h3>
-                  <p className="text-sm text-stone-400">Save your details once and book quickly next time.</p>
-               </div>
-               <div className="bg-[#24282B]/60 backdrop-blur-md rounded-2xl p-5 border border-white/5 shadow-xl transition-transform hover:-translate-y-1">
-                  <Gift className="text-[#D4AF37] mb-3" size={24} />
-                  <h3 className="font-bold text-white mb-1">Special guest offers</h3>
-                  <p className="text-sm text-stone-400">Get access to future promotional and seasonal offers.</p>
-               </div>
-               <div className="bg-[#24282B]/60 backdrop-blur-md rounded-2xl p-5 border border-white/5 shadow-xl transition-transform hover:-translate-y-1">
-                  <ShieldCheck className="text-[#D4AF37] mb-3" size={24} />
-                  <h3 className="font-bold text-white mb-1">Stay management</h3>
-                  <p className="text-sm text-stone-400">Track reservations and simplify future check-ins.</p>
-               </div>
-               <div className="bg-[#24282B]/60 backdrop-blur-md rounded-2xl p-5 border border-white/5 shadow-xl transition-transform hover:-translate-y-1">
-                  <MapPin className="text-[#D4AF37] mb-3" size={24} />
-                  <h3 className="font-bold text-white mb-1">Tirupati-ready</h3>
-                  <p className="text-sm text-stone-400">Built for the needs of spiritual and transit travel.</p>
-               </div>
-            </div>
-
-            <div className="flex items-center gap-6 mt-auto border-t border-white/10 pt-8">
-               <div className="flex items-center gap-2 text-stone-400 text-xs font-semibold">
-                  <Headset size={16} /> Direct booking support
-               </div>
-               <div className="flex items-center gap-2 text-stone-400 text-xs font-semibold">
-                  <ShieldCheck size={16} /> Secure profile
-               </div>
-            </div>
-         </div>
-      </div>
-
-      {/* RIGHT: SIGNUP FLOW PANEL */}
-      <div className="w-full md:w-[55%] lg:w-[50%] flex flex-col items-center justify-center p-6 md:p-12 mt-8 md:mt-0">
-        
-        {/* Mobile Header Context */}
-        <div className="md:hidden flex items-center gap-3 mb-6 w-full max-w-md">
-           <div className="w-8 h-8 rounded-sm bg-slate-900 flex items-center justify-center text-[#D4AF37]">
-              <Building2 size={20} strokeWidth={2.5} />
-           </div>
-           <span className="text-2xl font-black tracking-tight text-slate-900">Srimuni Hotels</span>
+      {/* Booking Confirmation Toast */}
+      {showConfirmation && (
+        <div className="fixed top-24 right-4 bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-in slide-in-from-right-4 duration-300 flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5" />
+          <div>
+            <p className="font-bold">Booking Confirmed!</p>
+            <p className="text-sm text-emerald-100">We&apos;ll send you a confirmation shortly.</p>
+          </div>
         </div>
+      )}
 
-        <div className="w-full max-w-md bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden transform transition-all">
-           
-           {/* Form Header */}
-           <div className="bg-slate-50 border-b border-slate-100 p-8 text-center relative">
-               <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-                 {showWhatsAppForm ? 'WhatsApp Booking' : 'Get started'}
-               </h2>
-               <p className="text-slate-500 text-sm mt-2 font-medium">
-                 {showWhatsAppForm ? 'Enter your travel details to instantly book via WhatsApp.' : 'Choose how you want to book your stay at Srimuni Hotels'}
-               </p>
-           </div>
+      <main>
+        {/* Hero */}
+        <section id="home">
+          <Hero onBookNow={() => router.push('/login')} onViewRooms={() => scrollToSection('rooms')} />
+        </section>
 
-            <div className="p-8">
-              {/* Main Landing Choices */}
-              {showWhatsAppForm ? (
-                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                   <button type="button" onClick={() => setShowWhatsAppForm(false)} className="text-sm font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1 -mt-2 mb-2 transition-colors">
-                     <ChevronRight size={14} className="rotate-180" /> Back
-                   </button>
-                   
-                   <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase tracking-wider">Date</label>
-                        <input type="date" value={waData.date} min={getToday()} onChange={e => setWaData({...waData, date: e.target.value})} className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#25D366] text-slate-800 font-semibold text-sm" />
-                      </div>
-                      <div>
-                        <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase tracking-wider">Time</label>
-                        <input type="time" value={waData.time} onChange={e => setWaData({...waData, time: e.target.value})} className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#25D366] text-slate-800 font-semibold text-sm" />
-                      </div>
-                      <div>
-                         <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase tracking-wider">Duration</label>
-                         <select value={waData.duration} onChange={e => setWaData({...waData, duration: e.target.value})} className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#25D366] text-slate-800 font-semibold text-sm">
-                            <option>1 Hour</option>
-                            <option>2 Hours</option>
-                            <option>3 Hours</option>
-                         </select>
-                      </div>
-                      <div>
-                         <label className="block text-[11px] font-bold text-slate-500 mb-1 uppercase tracking-wider">Guests</label>
-                         <select value={waData.pax} onChange={e => setWaData({...waData, pax: e.target.value})} className="w-full px-4 py-3 bg-slate-50 rounded-xl border border-slate-200 focus:ring-2 focus:ring-[#25D366] text-slate-800 font-semibold text-sm">
-                            <option>1 Guest</option>
-                            <option>2 Guests</option>
-                         </select>
-                      </div>
-                   </div>
-
-                   <a
-                     href={`https://wa.me/917075170769?text=${encodeURIComponent(`Hi Srimuni Hotels, I want to book a Fresh Up Room.\nDate: ${waData.date}\nTime: ${waData.time}\nDuration: ${waData.duration}\nPax: ${waData.pax}\nPayment: Pay at Hotel`)}`}
-                     target="_blank"
-                     rel="noopener noreferrer"
-                     className="flex h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 text-base font-bold text-white shadow-md transition hover:bg-[#1ebe5d]"
-                   >
-                     Send Booking to WhatsApp
-                     <span className="text-xl">›</span>
-                   </a>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Primary Actions & Explanations Combined */}
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    
-                    {/* Left: Mobile Login */}
-                    <div className="flex flex-col">
-                      <button
-                        type="button"
-                        onClick={() => router.push('/login')}
-                        className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 text-base font-bold text-white shadow-md transition hover:bg-slate-800"
-                      >
-                        Continue with Mobile
-                        <span className="text-xl">›</span>
-                      </button>
-                      <div className="mt-3 text-center px-2">
-                        <p className="text-xs font-bold text-slate-600">Website Booking</p>
-                        <p className="mt-0.5 text-[11px] text-slate-400 font-medium leading-tight">Save your profile & book faster next time</p>
-                      </div>
-                    </div>
-
-                    {/* Right: WhatsApp */}
-                    <div className="flex flex-col">
-                      <button
-                        type="button"
-                        onClick={() => setShowWhatsAppForm(true)}
-                        className="flex h-16 w-full items-center justify-center gap-2 rounded-2xl bg-[#25D366] px-4 text-base font-bold text-white shadow-md transition hover:bg-[#1ebe5d]"
-                      >
-                        Book on WhatsApp
-                        <span className="text-xl">›</span>
-                      </button>
-                      <div className="mt-3 text-center px-2">
-                        <p className="text-xs font-bold text-emerald-600">WhatsApp Booking</p>
-                        <p className="mt-0.5 text-[11px] text-emerald-500 font-medium leading-tight">Fastest checkout without login</p>
-                      </div>
-                    </div>
-
-                  </div>
-
-                  <div className="relative flex items-center justify-center mt-6 mb-4">
-                     <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
-                     <div className="relative bg-white px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">OR</div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleGuestContinue}
-                    className="h-14 w-full rounded-2xl border-2 border-slate-200 bg-white text-base font-bold text-slate-700 transition hover:bg-slate-50"
-                  >
-                    Continue as Guest
-                  </button>
-                </div>
-              )}
-           </div>
-
-           {/* Footer Trust Section */}
-           <div className="bg-slate-50 border-t border-slate-100 p-6 text-center">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-                  <a href={`https://wa.me/917075170769?text=${encodeURIComponent('Hi Srimuni Hotels, I need help with booking.')}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-emerald-700 font-bold py-3 rounded-xl transition-all border border-[#25D366]/20 text-sm">
-                     <Headset size={16} /> Need Help?
-                  </a>
-                  <a href="https://maps.app.goo.gl/f6xzBbryMTRZBQ6v8" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold py-3 rounded-xl transition-all border border-blue-200 text-sm">
-                     <MapPin size={16} /> Get Directions
-                  </a>
-              </div>
-              <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">
-                By accelerating your login, you agree to our Terms of Protocol and acknowledge our secure Privacy Policy. Your details guarantee direct-booking advantages.
+        {/* Rooms */}
+        <section id="rooms" className="py-20 bg-slate-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-14">
+              <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
+                Our Rooms &amp; Rates
+              </h2>
+              <p className="text-slate-500 max-w-2xl mx-auto text-lg font-medium">
+                Budget-friendly accommodation options for pilgrims and travelers.
+                Clean, comfortable rooms at affordable prices.
               </p>
-           </div>
-        </div>
-      </div>
-    
+            </div>
+
+            {/* Price Range Banner */}
+            <div className="mb-10 bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-200/50 p-5 rounded-2xl max-w-4xl mx-auto text-center">
+              <p className="text-slate-700">
+                <strong>Price Range:</strong> Non-AC ₹900-1100 | AC ₹1500-1800 | Deluxe AC ₹1800+ | Fresh Up ₹200-600 | Short Stay ₹600-900
+              </p>
+            </div>
+
+            {/* Room Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7 mb-10">
+              {rooms.map((room) => (
+                <RoomCard key={room.id} room={room} onBook={(room) => router.push(`/login?roomId=${room.id}`)} />
+              ))}
+            </div>
+
+            {/* Group Bookings CTA */}
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-8 rounded-2xl text-center text-white shadow-xl">
+              <h3 className="text-2xl font-bold mb-3">Group Bookings Available</h3>
+              <p className="text-blue-100 mb-5 max-w-lg mx-auto">
+                Planning a group pilgrimage? We offer special discounted rates for group bookings.
+                Contact us for customized packages.
+              </p>
+              <a
+                href="tel:+917416686677"
+                className="inline-flex items-center gap-2 bg-white text-blue-700 px-8 py-3.5 rounded-xl font-bold transition-all hover:bg-blue-50 shadow-md hover:-translate-y-0.5"
+              >
+                <Phone className="w-4 h-4" />
+                Enquire for Group Rates
+              </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Discounts */}
+        <DiscountsSection />
+
+        {/* Tirupati Info */}
+        <section id="tirupati">
+          <TirupatiInfo />
+        </section>
+
+        {/* Tirumala Info */}
+        <section id="tirumala">
+          <TirumalaInfo />
+        </section>
+
+        {/* Contact */}
+        <section id="contact" className="py-20 bg-white">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-10 text-center">
+              Get in Touch
+            </h2>
+            <div className="bg-gradient-to-br from-amber-50 to-amber-100/50 p-8 rounded-2xl border border-amber-200/30">
+              <p className="text-center text-slate-600 mb-8 text-lg font-medium max-w-lg mx-auto">
+                Have questions about your stay or need assistance? We&apos;re here to help make your
+                pilgrimage comfortable and memorable.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="tel:+917416686677"
+                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-md shadow-amber-200/50 hover:-translate-y-0.5"
+                >
+                  <Phone className="w-4 h-4" />
+                  Call Us Now
+                </a>
+                <a
+                  href={`https://wa.me/917416686677?text=${encodeURIComponent('Hi Srinivasa Residency, I need help with booking.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1ebe5d] text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-md hover:-translate-y-0.5"
+                >
+                  <Headset className="w-4 h-4" />
+                  WhatsApp Us
+                </a>
+                <a
+                  href="https://maps.app.goo.gl/f6xzBbryMTRZBQ6v8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border-2 border-slate-200 px-8 py-3.5 rounded-xl font-bold transition-all hover:-translate-y-0.5"
+                >
+                  <MapPin className="w-4 h-4" />
+                  Get Directions
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Map */}
+        <section className="bg-slate-50 border-t border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2 text-center">Explore the Neighborhood</h2>
+            <p className="text-slate-500 mb-8 font-medium text-center">Discover nearby temples, transit hubs, and restaurants around Srinivasa Residency.</p>
+            <div className="w-full h-[500px] md:h-[600px] rounded-2xl overflow-hidden shadow-lg border border-slate-200 bg-slate-100 relative">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="animate-pulse flex flex-col items-center">
+                  <MapPin className="text-slate-300 mb-2" size={32} />
+                  <p className="text-slate-400 font-medium text-sm">Loading Google Maps...</p>
+                </div>
+              </div>
+              <iframe
+                src="https://storage.googleapis.com/maps-solutions-1wlfz6x2r9/neighborhood-discovery/029a/neighborhood-discovery.html"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                loading="lazy"
+                className="relative z-10"
+              />
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <Footer />
     </div>
   );
 }

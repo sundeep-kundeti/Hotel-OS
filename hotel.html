@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ALT – QR Booking (Plain JS + Discount)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>button:focus{outline:none}</style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <div class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl p-5 sm:p-8">
+      <header class="mb-6 text-center">
+        <h1 id="hotelName" class="text-2xl font-bold tracking-tight">ALT Refresh Pods — Hotel Sri Sathya Sai</h1>
+        <p class="text-sm text-gray-600">Scan → Select → Pay (UPI)</p>
+      </header>
+
+      <div class="space-y-5">
+        <!-- Room Type (dropdown kept for flexibility) -->
+        <div>
+          <label class="block text-sm font-medium mb-2">Room type</label>
+          <select id="room" class="w-full rounded-xl border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-indigo-500">
+            <option value="dayuse">Day‑Use Room</option>
+            <option value="freshup">Fresh‑up Pod</option>
+            <option value="standard">Standard Room</option>
+          </select>
+          <p class="mt-2 text-xs text-gray-500">All prices below are <strong>inclusive of taxes</strong> per your policy.</p>
+        </div>
+
+        <!-- Hours Toggle -->
+        <div>
+          <label class="block text-sm font-medium mb-2">Duration</label>
+          <div class="flex flex-wrap gap-2" id="hoursButtons"></div>
+        </div>
+
+        <!-- Discount Tabs -->
+        <div>
+          <div class="flex gap-2 mb-2">
+            <button id="tabStandard" class="px-3 py-2 rounded-xl border border-indigo-500 text-indigo-600 bg-indigo-50">Standard</button>
+            <button id="tabDiscount" class="px-3 py-2 rounded-xl border border-gray-200 text-gray-700">Discount code</button>
+          </div>
+          <div id="discountPanel" class="hidden">
+            <label class="block text-sm font-medium mb-2">Have a discount code?</label>
+            <div class="flex gap-2">
+              <input id="discountCode" class="flex-1 rounded-xl border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-indigo-500" placeholder="e.g., STUDENT" />
+              <button id="applyDiscount" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 active:bg-indigo-800">Apply</button>
+            </div>
+            <p id="discountMsg" class="mt-2 text-xs"></p>
+          </div>
+          <p class="text-xs text-gray-500 mt-2">Policy: Base price ₹1,200 (incl. taxes). <strong>College students</strong> get a discount with valid ID (use code; ID checked at desk).</p>
+        </div>
+
+        <!-- Optional Guest Info -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-1">Your name (optional)</label>
+            <input id="guestName" class="w-full rounded-xl border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Kishan R." />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-1">Phone (optional)</label>
+            <input id="phone" inputmode="tel" class="w-full rounded-xl border border-gray-200 px-3 py-2 focus:ring-2 focus:ring-indigo-500" placeholder="e.g., 9xxxxxxxxx" />
+          </div>
+        </div>
+
+        <!-- Price Summary (incl. taxes) -->
+        <div class="bg-gray-50 rounded-2xl border border-gray-200 p-4">
+          <div class="flex items-center justify-between text-sm"><span>Base (incl. taxes)</span><span id="baseTotal"></span></div>
+          <div id="discountRow" class="hidden flex items-center justify-between text-sm mt-1 text-green-700"><span>Discount</span><span id="discountAmt">− ₹0</span></div>
+          <div class="border-t mt-3 pt-3 flex items-center justify-between font-semibold">
+            <span>Total (incl. taxes)</span><span id="total" class="text-lg"></span>
+          </div>
+        </div>
+
+        <!-- Pay Button -->
+        <button id="pay" class="w-full py-3 rounded-2xl bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700 active:bg-indigo-800 focus:ring-4 focus:ring-indigo-300">Proceed to Payment (UPI)</button>
+
+        <ul class="text-xs text-gray-500 list-disc pl-5 space-y-1">
+          <li>UPI opens in your payment app (on mobile). On desktop, copy the link to your phone.</li>
+          <li>Show your paid screen and (if used) student ID at the desk.</li>
+          <li>Discounts are verified at the front desk. Misuse voids discount.</li>
+        </ul>
+      </div>
+
+      <footer class="mt-6 text-center text-xs text-gray-400">© <span id="year"></span> <span id="hotelNameFoot"></span></footer>
+    </div>
+  </div>
+
+  <script>
+    // ====== CONFIG ======
+    const CONFIG = {
+      hotelName: "ALT Refresh Pods — Hotel Sri Sathya Sai",
+      currency: "INR",
+      upi: {
+        vpa: "srimunihotelsandhospitalityservicesprivatelimited.ibz@icici", // <-- CHANGE to your UPI VPA
+        payeeName: "ALT Hotels",
+        enabled: true,
+      },
+      // Hour options shown to the user
+      allowedHours: [1, 2, 3, 6, 12, 24],
+      // Slab pricing (TOTALS including taxes)
+      slabs: [
+        { maxHours: 3, total: 1200 },
+        { maxHours: 6, total: 1500 },
+        { maxHours: 12, total: 1800 },
+        { maxHours: 24, total: 2400 },
+      ],
+      // Discounts by code — edit as needed.
+      // Example: 20% off for students. ID checked at desk.
+      discounts: {
+        "STUDENT": { type: "percent", value: 20, label: "College Student 20% (ID required)" },
+        // Add more: "WELCOME100": { type: "flat", value: 100, label: "₹100 off" }
+      },
+      taxesIncluded: true,
+    };
+
+    // ====== UTIL ======
+    function currencyFormat(n, currency = CONFIG.currency) {
+      try { return new Intl.NumberFormat("en-IN", { style: "currency", currency }).format(n); }
+      catch { return `${currency} ${Number(n).toFixed(2)}`; }
+    }
+
+    function slabPrice(hours) {
+      const h = Math.max(1, Number(hours) || 1);
+      for (const s of CONFIG.slabs) {
+        if (h <= s.maxHours) return s.total;
+      }
+      // If beyond defined slabs, default to highest
+      return CONFIG.slabs[CONFIG.slabs.length - 1].total;
+    }
+
+    function computeTotal(hours, applied) {
+      const base = slabPrice(hours);
+      let discount = 0;
+      if (applied && applied.type === 'percent') {
+        discount = (base * applied.value) / 100;
+      } else if (applied && applied.type === 'flat') {
+        discount = applied.value;
+      }
+      // Prevent negative totals
+      const total = Math.max(0, Math.round((base - discount) * 100) / 100);
+      return { base, discount, total };
+    }
+
+    function makeUPILink({ amount, note, vpa, payeeName }) {
+      const params = new URLSearchParams({ pa: vpa, pn: payeeName || CONFIG.hotelName, am: amount.toFixed(2), cu: "INR", tn: note, tr: `ALT-${Date.now()}` });
+      return `upi://pay?${params.toString()}`;
+    }
+
+    // ====== DOM ======
+    const roomEl = document.getElementById('room');
+    const hoursButtonsEl = document.getElementById('hoursButtons');
+    const baseTotalEl = document.getElementById('baseTotal');
+    const discountRowEl = document.getElementById('discountRow');
+    const discountAmtEl = document.getElementById('discountAmt');
+    const totalEl = document.getElementById('total');
+    const payBtn = document.getElementById('pay');
+
+    const tabStandard = document.getElementById('tabStandard');
+    const tabDiscount = document.getElementById('tabDiscount');
+    const discountPanel = document.getElementById('discountPanel');
+    const discountCodeInput = document.getElementById('discountCode');
+    const applyDiscountBtn = document.getElementById('applyDiscount');
+    const discountMsg = document.getElementById('discountMsg');
+
+    document.getElementById('hotelName').textContent = CONFIG.hotelName;
+    document.getElementById('hotelNameFoot').textContent = CONFIG.hotelName;
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    let selectedHours = CONFIG.allowedHours[0];
+    let appliedDiscount = null; // { code, type, value, label }
+
+    function setTab(mode) {
+      if (mode === 'discount') {
+        tabStandard.className = 'px-3 py-2 rounded-xl border border-gray-200 text-gray-700';
+        tabDiscount.className = 'px-3 py-2 rounded-xl border border-indigo-500 text-indigo-600 bg-indigo-50';
+        discountPanel.classList.remove('hidden');
+      } else {
+        tabStandard.className = 'px-3 py-2 rounded-xl border border-indigo-500 text-indigo-600 bg-indigo-50';
+        tabDiscount.className = 'px-3 py-2 rounded-xl border border-gray-200 text-gray-700';
+        discountPanel.classList.add('hidden');
+      }
+    }
+
+    tabStandard.addEventListener('click', () => setTab('standard'));
+    tabDiscount.addEventListener('click', () => setTab('discount'));
+
+    applyDiscountBtn.addEventListener('click', () => {
+      const raw = (discountCodeInput.value || '').trim().toUpperCase();
+      const def = CONFIG.discounts[raw];
+      if (!raw) { appliedDiscount = null; discountMsg.textContent = 'No code entered.'; discountMsg.className = 'mt-2 text-xs text-gray-500'; refreshPrice(); return; }
+      if (!def) { appliedDiscount = null; discountMsg.textContent = 'Invalid code. Please check at the desk.'; discountMsg.className = 'mt-2 text-xs text-red-600'; refreshPrice(); return; }
+      appliedDiscount = { code: raw, ...def };
+      discountMsg.textContent = `${def.label} applied.`;
+      discountMsg.className = 'mt-2 text-xs text-green-700';
+      refreshPrice();
+    });
+
+    function renderHoursButtons() {
+      hoursButtonsEl.innerHTML = '';
+      CONFIG.allowedHours.forEach(h => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = h + ' hr' + (h > 1 ? 's' : '');
+        b.className = 'px-4 py-2 rounded-full border transition ' + (selectedHours === h ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-200');
+        b.addEventListener('click', () => { selectedHours = h; renderHoursButtons(); refreshPrice(); });
+        hoursButtonsEl.appendChild(b);
+      });
+    }
+
+    function refreshPrice() {
+      const p = computeTotal(selectedHours, appliedDiscount);
+      baseTotalEl.textContent = currencyFormat(p.base);
+      if (p.discount > 0) {
+        discountRowEl.classList.remove('hidden');
+        discountAmtEl.textContent = '− ' + currencyFormat(p.discount);
+      } else {
+        discountRowEl.classList.add('hidden');
+        discountAmtEl.textContent = '− ' + currencyFormat(0);
+      }
+      totalEl.textContent = currencyFormat(p.total);
+    }
+
+    payBtn.addEventListener('click', () => {
+      if (!CONFIG.upi.enabled || !CONFIG.upi.vpa) { alert('Payment not enabled / VPA missing'); return; }
+      const amount = computeTotal(selectedHours, appliedDiscount).total; // final, incl. taxes
+      const note = `${CONFIG.hotelName} · ${roomEl.options[roomEl.selectedIndex].text} · ${selectedHours}hr${selectedHours>1?'s':''}${appliedDiscount? ' · ' + appliedDiscount.code : ''}`;
+      const link = makeUPILink({ amount, note, vpa: CONFIG.upi.vpa, payeeName: CONFIG.upi.payeeName });
+      window.location.href = link;
+      try {
+        localStorage.setItem('qr-booking-latest', JSON.stringify({
+          name: document.getElementById('guestName').value,
+          phone: document.getElementById('phone').value,
+          room: roomEl.value,
+          hours: selectedHours,
+          base: computeTotal(selectedHours, null).base,
+          discount: appliedDiscount ? appliedDiscount.code : null,
+          total: amount,
+          ts: Date.now()
+        }));
+      } catch {}
+    });
+
+    // Init
+    setTab('standard');
+    renderHoursButtons();
+    refreshPrice();
+  </script>
+</body>
+</html>

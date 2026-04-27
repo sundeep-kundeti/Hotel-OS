@@ -14,13 +14,13 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Srinivasa Residency by Srimuni | Fresh Up Rooms in Tirupati",
-  description: "Book hourly fresh up rooms in Tirupati natively at Srinivasa Residency by Srimuni. Ideal for wash & change purposes.",
-  keywords: ["Tirupati Rooms", "Hourly Rooms Tirupati", "Fresh Up Rooms", "Srinivasa Residency", "Srimuni", "Wash and Change Tirupati"],
+  title: "Srinivasa Residency by Srimuni Hotels | Budget Rooms in Tirupati",
+  description: "Book affordable rooms near Tirupati Railway Station at Srinivasa Residency by Srimuni Hotels. AC, Non-AC, Deluxe rooms, Fresh Up & Short Stay options for pilgrims.",
+  keywords: ["Tirupati Rooms", "Budget Hotels Tirupati", "Fresh Up Rooms", "Srinivasa Residency", "Srimuni Hotels", "Lodge Tirupati", "Tirumala Accommodation", "Pilgrim Stay Tirupati"],
   openGraph: {
-    title: 'Srinivasa Residency by Srimuni | Fresh Up Rooms',
-    description: 'Book hourly fresh up rooms natively at Srinivasa Residency by Srimuni.',
-    siteName: 'Srinivasa Residency by Srimuni',
+    title: 'Srinivasa Residency by Srimuni Hotels | Budget Rooms in Tirupati',
+    description: 'Book affordable rooms near Tirupati Railway Station. AC, Non-AC, Deluxe, Fresh Up & Short Stay options for pilgrims visiting Tirumala.',
+    siteName: 'Srinivasa Residency by Srimuni Hotels',
     locale: 'en_IN',
     type: 'website',
   }

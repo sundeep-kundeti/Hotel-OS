@@ -1,9 +1,20 @@
 'use client';
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle2, ChevronRight, User, Mail, Calendar, MapPin, Building2, Phone, ShieldCheck, Clock, Gift, Headset, Lock } from 'lucide-react';
+import BookingModal from '../components/BookingModal';
+import { rooms } from '../page';
+import type { BookingData } from '../components/BookingModal';
 
-export default function SrimuniSignupPage() {
+export default function SrimuniSignupPageWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F9F9F8] flex items-center justify-center">Loading...</div>}>
+      <SrimuniSignupPage />
+    </Suspense>
+  );
+}
+
+function SrimuniSignupPage() {
   const getMaxDob = () => {
     const d = new Date();
     d.setFullYear(d.getFullYear() - 18);
@@ -14,9 +25,13 @@ export default function SrimuniSignupPage() {
   };
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const roomId = searchParams.get('roomId');
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showGuestModal, setShowGuestModal] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -72,11 +87,32 @@ export default function SrimuniSignupPage() {
   }
 
   const handleGuestContinue = () => {
-      router.push('/fresh-up'); // Bypassing login entirely to view public slots
+      setShowGuestModal(true);
   }
+
+  const handleConfirmBooking = (booking: BookingData) => {
+    setShowGuestModal(false);
+    setShowConfirmation(true);
+    // You can also record the booking to backend here
+    setTimeout(() => {
+       setShowConfirmation(false);
+       router.push('/fresh-up');
+    }, 5000);
+  };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#F9F9F8] font-sans antialiased text-slate-800">
+      
+      {/* Booking Confirmation Toast */}
+      {showConfirmation && (
+        <div className="fixed top-24 right-4 bg-emerald-500 text-white px-6 py-4 rounded-2xl shadow-2xl z-50 animate-in slide-in-from-right-4 duration-300 flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5" />
+          <div>
+            <p className="font-bold">Booking Confirmed!</p>
+            <p className="text-sm text-emerald-100">Your guest booking was successful.</p>
+          </div>
+        </div>
+      )}
       
       {/* LEFT: BRAND MARKETING PANEL */}
       <div className="w-full md:w-[45%] lg:w-[50%] bg-[#1A1D20] text-stone-100 flex flex-col p-8 md:p-12 lg:p-20 relative overflow-hidden">
@@ -238,6 +274,19 @@ export default function SrimuniSignupPage() {
                    {loading ? 'Authenticating...' : 'Continue Securely'}
                    {!loading && <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />}
                  </button>
+
+                 <div className="relative flex items-center justify-center my-6">
+                    <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
+                    <div className="relative bg-white px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">OR</div>
+                 </div>
+
+                 <button
+                   type="button"
+                   onClick={handleGuestContinue}
+                   className="w-full border-2 border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold py-4 rounded-xl transition-all shadow-sm active:scale-[0.98]"
+                 >
+                   Continue as Guest
+                 </button>
                </form>
              )}
 
@@ -320,6 +369,15 @@ export default function SrimuniSignupPage() {
         </div>
       </div>
     
+      {/* Booking Modal */}
+      {showGuestModal && (
+        <BookingModal
+          room={rooms.find(r => r.id === roomId) || rooms[0]}
+          onClose={() => setShowGuestModal(false)}
+          onConfirm={handleConfirmBooking}
+        />
+      )}
+
     </div>
   );
 }

@@ -1,0 +1,209 @@
+import React, { useMemo, useState } from "react";
+
+// Simple QR-based booking page
+// How to use:
+// 1) Deploy this single file as your site (e.g., Netlify, Vercel, GitHub Pages).
+// 2) Create a QR code pointing to the deployed URL.
+// 3) Guests scan → select room type & hours → tap "Proceed to Payment" (UPI intent link).
+// 4) Edit CONFIG below to match your hotel, room names, and prices. 
+
+const CONFIG = {
+  hotelName: "ALT Refresh Pods — Hotel Sri Sathya Sai",
+  currency: "INR",
+  taxesPct: 12, // e.g., 12% GST; set to 0 if not applicable
+  // Set your UPI details (payee VPA and display name). Guests will pay via UPI intent on mobile.
+  upi: {
+    vpa: "altsrisathya@ibl", // <-- CHANGE THIS to your UPI VPA (e.g., alt@sbi)
+    payeeName: "ALT Hotels", // <-- Shown in UPI apps
+    enabled: true,
+  },
+  // Define your room types and pricing. Price = base + perHour * (hours - 1), then tax applied.
+  roomTypes: [
+    { id: "freshup", name: "Fresh‑up Pod", base: 300, perHour: 200 },
+    { id: "standard", name: "Standard Room", base: 800, perHour: 400 },
+    { id: "deluxe", name: "Deluxe Room", base: 1200, perHour: 500 },
+  ],
+  allowedHours: [1, 2, 3, 6, 12, 24],
+  priceCap: 2400, // e.g., 1600 to cap price; set null for no cap
+};
+
+function currencyFormat(n, currency = CONFIG.currency) {
+  try {
+    return new Intl.NumberFormat("en-IN", { style: "currency", currency }).format(n);
+  } catch (e) {
+    return `${currency} ${n.toFixed(2)}`;
+  }
+}
+
+function computePrice(hours) {
+  const h = Math.max(1, Number(hours) || 1);
+  // Pricing rule:
+  // - Base rate = ₹800/hr
+  // - Increases by ₹200/hr up to 3 hours (i.e., max ₹1200/hr)
+  // - For h >= 3, rate stays at ₹1200/hr
+  // - Subtotal is capped at ₹2400 (before tax)
+  const ratePerHour = 800 + 200 * Math.min(h - 1, 2); // 800, 1000, 1200...
+  let subtotal = ratePerHour * h;
+  if (CONFIG.priceCap) subtotal = Math.min(subtotal, CONFIG.priceCap);
+  const tax = CONFIG.taxesPct ? (subtotal * CONFIG.taxesPct) / 100 : 0;
+  const total = Math.round((subtotal + tax) * 100) / 100;
+  return { ratePerHour, subtotal, tax, total };
+}
+
+function makeUPILink({ amount, note, vpa, payeeName }) {
+  // UPI deep link. Opens supported UPI apps on mobile.
+  // More params: mc, tr, url can be added if needed.
+  const params = new URLSearchParams({
+    pa: vpa, // payee VPA
+    pn: payeeName || CONFIG.hotelName,
+    am: amount.toFixed(2),
+    cu: "INR",
+    tn: note,
+    tr: `ALT-${Date.now()}`,
+  });
+  return `upi://pay?${params.toString()}`;
+}
+
+export default function QRBooking() {
+  const [selectedRoomId, setSelectedRoomId] = useState(CONFIG.roomTypes[0].id);
+  const [hours, setHours] = useState(CONFIG.allowedHours[0]);
+  const [guestName, setGuestName] = useState("");
+  const [phone, setPhone] = useState("");
+
+  const room = useMemo(() => CONFIG.roomTypes.find((r) => r.id === selectedRoomId) || CONFIG.roomTypes[0], [selectedRoomId]);
+  const price = useMemo(() => computePrice(hours), [hours]);
+
+  function onPay() {
+    if (!CONFIG.upi.enabled) {
+      alert("Payment is not enabled. Please enable UPI in CONFIG or integrate your gateway.");
+      return;
+    }
+    if (!CONFIG.upi.vpa) {
+      alert("Missing UPI VPA in CONFIG.upi.vpa");
+      return;
+    }
+    const note = `${CONFIG.hotelName} · ${room.name} · ${hours}hr${hours > 1 ? "s" : ""}`;
+    const link = makeUPILink({ amount: price.total, note, vpa: CONFIG.upi.vpa, payeeName: CONFIG.upi.payeeName });
+
+    // Attempt to open UPI app (mobile). On desktop, show copy link fallback.
+    window.location.href = link;
+    // Also copy details to localStorage for desk verification/reference.
+    try {
+      localStorage.setItem(
+        "qr-booking-latest",
+        JSON.stringify({ guestName, phone, room: room.name, hours, total: price.total, ts: Date.now() })
+      );
+    } catch {}
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-5 sm:p-8">
+        <header className="mb-6 text-center">
+          <h1 className="text-2xl font-bold tracking-tight">{CONFIG.hotelName}</h1>
+          <p className="text-sm text-gray-600">Scan → Select → Pay (UPI)</p>
+        </header>
+
+        <div className="space-y-5">
+          {/* Room Type */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Room type</label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {CONFIG.roomTypes.map((r) => (
+                <button
+                  key={r.id}
+                  onClick={() => setSelectedRoomId(r.id)}
+                  className={`border rounded-xl px-3 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                    selectedRoomId === r.id ? "border-indigo-500 ring-1 ring-indigo-500" : "border-gray-200"
+                  }`}
+                >
+                  <div className="font-semibold">{r.name}</div>
+                  <div className="text-xs text-gray-500">
+                    {currencyFormat(800)}/hr; +{currencyFormat(200)}/hr up to 3 hrs; Cap {currencyFormat(CONFIG.priceCap)}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Hours */}
+          <div>
+            <label className="block text-sm font-medium mb-2">Duration</label>
+            <div className="flex flex-wrap gap-2">
+              {CONFIG.allowedHours.map((h) => (
+                <button
+                  key={h}
+                  onClick={() => setHours(h)}
+                  className={`px-4 py-2 rounded-full border transition focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                    hours === h ? "border-indigo-500 ring-1 ring-indigo-500" : "border-gray-200"
+                  }`}
+                >
+                  {h} hr{h > 1 ? "s" : ""}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Optional Guest Info */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium mb-1">Your name (optional)</label>
+              <input
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="e.g., Kishan R."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Phone (optional)</label>
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                inputMode="tel"
+                className="w-full rounded-xl border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="e.g., 9xxxxxxxxx"
+              />
+            </div>
+          </div>
+
+          {/* Price Summary */}
+          <div className="bg-gray-50 rounded-2xl border border-gray-200 p-4">
+            <div className="flex items-center justify-between text-sm">
+              <span>Subtotal</span>
+              <span>{currencyFormat(price.subtotal)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm mt-1">
+              <span>Tax ({CONFIG.taxesPct}%)</span>
+              <span>{currencyFormat(price.tax)}</span>
+            </div>
+            <div className="border-t mt-3 pt-3 flex items-center justify-between font-semibold">
+              <span>Total</span>
+              <span className="text-lg">{currencyFormat(price.total)}</span>
+            </div>
+            {CONFIG.priceCap && (
+              <div className="mt-2 text-xs text-gray-500">(Capped at {currencyFormat(CONFIG.priceCap)})</div>
+            )}
+          </div>
+
+          {/* Pay Button */}
+          <button
+            onClick={onPay}
+            className="w-full py-3 rounded-2xl bg-indigo-600 text-white font-semibold shadow hover:bg-indigo-700 active:bg-indigo-800 focus:outline-none focus:ring-4 focus:ring-indigo-300"
+          >
+            Proceed to Payment (UPI)
+          </button>
+
+          {/* Helpful Notes */}
+          <ul className="text-xs text-gray-500 list-disc pl-5 space-y-1">
+            <li>UPI opens in your payment app (on mobile). On desktop, copy the link to your phone.</li>
+            <li>Show the paid screen at the desk to receive room keys.</li>
+            <li>If UPI fails, pay at desk — your selection is saved for faster check‑in.</li>
+          </ul>
+        </div>
+
+        <footer className="mt-6 text-center text-xs text-gray-400">© {new Date().getFullYear()} {CONFIG.hotelName}</footer>
+      </div>
+    </div>
+  });
+}

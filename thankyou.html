@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Thank You — Booking Confirmed</title>
+  <style>
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#0b1220;color:#e9eefc;min-height:100vh;display:grid;place-items:center;padding:24px}
+    .card{max-width:640px;width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:20px}
+    h1{margin:0 0 8px;font-size:22px}
+    p{margin:0 0 10px;color:rgba(233,238,252,.8)}
+    .pill{display:inline-block;margin-top:10px;padding:10px 12px;border-radius:999px;background:rgba(55,211,153,.15);border:1px solid rgba(55,211,153,.35)}
+    a{color:#7aa7ff}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Thank you for booking ✅</h1>
+    <p id="msg">Email confirmation has been sent.</p>
+    <div class="pill" id="bid"></div>
+    <p style="margin-top:14px">
+      <a href="/book.html">Make another booking</a>
+      &nbsp;•&nbsp;
+      <a href="/">Go to homepage</a>
+    </p>
+  </div>
+
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const mode = qs.get("mode") || "";
+    const bid = qs.get("bid") || "";
+    document.getElementById("bid").textContent = bid ? `Booking ID: ${bid}` : "Booking confirmed";
+
+    const msg = (mode === "upi")
+      ? "Payment confirmed. Email confirmation has been sent."
+      : "Reservation confirmed (Pay at Hotel). Email confirmation has been sent.";
+
+    document.getElementById("msg").textContent = msg;
+  </script>
+</body>
+</html>

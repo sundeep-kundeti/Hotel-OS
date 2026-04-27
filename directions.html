@@ -1,0 +1,111 @@
+<!-- directions.html (FULL FILE) -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Srinivasa Residency — Directions</title>
+  <meta name="description" content="Directions to Srinivasa Residency (Srimuni Hotels) — Tirupati" />
+
+  <style>
+    html, body { height: 100%; margin: 0; background:#0b1220; }
+    .topbar{
+      position:fixed; top:0; left:0; right:0; z-index:5;
+      display:flex; gap:12px; align-items:center; justify-content:space-between;
+      padding:12px 14px; color:#e9eefc;
+      background:rgba(11,18,32,.92); backdrop-filter: blur(10px);
+      border-bottom:1px solid rgba(255,255,255,.10);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    .topbar a{
+      color:#e9eefc; text-decoration:none;
+      padding:10px 12px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      font-weight:700;
+      white-space:nowrap;
+    }
+    .wrap{
+      height:100%;
+      padding-top:56px; /* space for topbar */
+    }
+
+    /* Locator styles */
+    gmpx-store-locator {
+      width: 100%;
+      height: calc(100% - 0px);
+
+      --gmpx-color-surface: #fff;
+      --gmpx-color-on-surface: #212121;
+      --gmpx-color-on-surface-variant: #757575;
+      --gmpx-color-primary: #1967d2;
+      --gmpx-color-outline: #e0e0e0;
+      --gmpx-fixed-panel-width-row-layout: 28.5em;
+      --gmpx-fixed-panel-height-column-layout: 65%;
+      --gmpx-font-family-base: "Roboto", sans-serif;
+      --gmpx-font-family-headings: "Roboto", sans-serif;
+      --gmpx-font-size-base: 0.875rem;
+      --gmpx-hours-color-open: #188038;
+      --gmpx-hours-color-closed: #d50000;
+      --gmpx-rating-color: #ffb300;
+      --gmpx-rating-color-empty: #e0e0e0;
+    }
+  </style>
+
+  <script>
+    const MAPS_API_KEY = "AIzaSyCQmnjzGff20fIhj-To8eMaIWfn6pb8HIw";
+
+    const CONFIGURATION = {
+      locations: [
+        {
+          title: "Srinivasa residency by Srimuni",
+          address1: "19-2-50-1, old Reniguta road korramebugubta, Tirupati Andhra pradesh 517501",
+          address2: "Tirupati, Andhra Pradesh, India",
+          coords: { lat: 13.6270686, lng: 79.4318138 },
+          placeId: "ChIJXZoKCLlLTToRQAeI9vFxiiU"
+        }
+      ],
+      mapOptions: {
+        center: { lat: 13.6270686, lng: 79.4318138 },
+        fullscreenControl: true,
+        mapTypeControl: false,
+        streetViewControl: false,
+        zoom: 14,
+        zoomControl: true,
+        maxZoom: 17,
+        mapId: ""
+      },
+      mapsApiKey: MAPS_API_KEY,
+      capabilities: {
+        input: true,
+        autocomplete: true,
+        directions: true,
+        distanceMatrix: true,
+        details: false,
+        actions: true
+      }
+    };
+  </script>
+
+  <script type="module">
+    document.addEventListener("DOMContentLoaded", async () => {
+      await customElements.whenDefined("gmpx-store-locator");
+      const locator = document.querySelector("gmpx-store-locator");
+      locator.configureFromQuickBuilder(CONFIGURATION);
+    });
+  </script>
+</head>
+
+<body>
+  <div class="topbar">
+    <div><strong>Directions</strong> — Srinivasa Residency</div>
+    <a href="/book.html">← Back to Booking</a>
+  </div>
+
+  <div class="wrap">
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js"></script>
+    <gmpx-api-loader key="AIzaSyCQmnjzGff20fIhj-To8eMaIWfn6pb8HIw" solution-channel="GMP_QB_locatorplus_v11_cABD"></gmpx-api-loader>
+    <gmpx-store-locator map-id="DEMO_MAP_ID"></gmpx-store-locator>
+  </div>
+</body>
+</html>
