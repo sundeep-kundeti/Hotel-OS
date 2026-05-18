@@ -2,29 +2,38 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Check if they are trying to access protected paths
-  if (request.nextUrl.pathname.startsWith('/fresh-up/manager') || request.nextUrl.pathname.startsWith('/reservations')) {
-     
-     const authCookie = request.cookies.get('hotel_os_session');
+  const { pathname } = request.nextUrl;
 
-     // If no valid session securely identified, force block
-     if (!authCookie) {
-        return NextResponse.redirect(new URL('/login', request.url));
-     }
+  // ── Hotel OS Manager routes (existing) ──────────────────────────────────
+  if (pathname.startsWith('/fresh-up/manager') || pathname.startsWith('/reservations')) {
+    const authCookie = request.cookies.get('hotel_os_session');
+    if (!authCookie) {
+      return NextResponse.redirect(new URL('/login', request.url));
+    }
+  }
 
-     // Under ideal circumstances we would decode the JWT and check expiration/role.
-     // In Edge Config, we trust the signature integrity verified primarily upon token issue, mapped to HttpOnly.
-     // If they hold the hotel_os_session cookie, they pass the middleware firewall.
-
+  // ── Travel Partner Tool routes ────────────────────────────────────────
+  // Allow login page through; protect everything else under /travel-partners
+  if (
+    pathname.startsWith('/travel-partners') &&
+    !pathname.startsWith('/travel-partners/login') &&
+    !pathname.startsWith('/api/travel-partners/auth')
+  ) {
+    const tpSession = request.cookies.get('tp_session');
+    if (!tpSession) {
+      const loginUrl = new URL('/travel-partners/login', request.url);
+      loginUrl.searchParams.set('from', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   return NextResponse.next();
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
   matcher: [
     '/fresh-up/manager/:path*',
     '/reservations/:path*',
+    '/travel-partners/:path*',
   ],
 };
