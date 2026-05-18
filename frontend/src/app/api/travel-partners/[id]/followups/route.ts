@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '../../../../../lib/supabaseServer';
-import { createFollowupSchema } from '../../../../../features/travel-partners/schemas/travelPartner.schemas';
 
 export const runtime = 'edge';
 
@@ -47,16 +46,13 @@ export async function POST(
     const { id } = await params;
     const body = await request.json();
 
-    const parsed = createFollowupSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: parsed.error.flatten() },
-        { status: 400 }
-      );
-    }
-
     const enteredBy = getStaffUsername(request);
-    const d = parsed.data;
+    const d = {
+      contact_method: body.contact_method || null,
+      response_status: body.response_status || null,
+      next_followup_at: body.next_followup_at || null,
+      notes: body.notes || null,
+    };
 
     const { data: followup, error } = await supabaseServer
       .from('followup_logs')

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '../../../../../lib/supabaseServer';
-import { createCommissionSchema } from '../../../../../features/travel-partners/schemas/travelPartner.schemas';
 
 export const runtime = 'edge';
 
@@ -47,28 +46,33 @@ export async function POST(
     const { id } = await params;
     const body = await request.json();
 
-    const parsed = createCommissionSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: parsed.error.flatten() },
-        { status: 400 }
-      );
+    const commissionAmount = Number(body.commission_amount);
+    if (!commissionAmount || commissionAmount <= 0) {
+      return NextResponse.json({ error: 'commission_amount must be a positive number' }, { status: 400 });
     }
 
     const enteredBy = getStaffUsername(request);
-    const d = parsed.data;
+    const d = {
+      customer_name: body.customer_name || null,
+      room_number: body.room_number || null,
+      booking_amount: Number(body.booking_amount) || 0,
+      commission_amount: commissionAmount,
+      commission_status: body.commission_status || 'Pending',
+      payment_mode: body.payment_mode || 'Pending',
+      notes: body.notes || null,
+    };
 
     const { data: commission, error } = await supabaseServer
       .from('commission_entries')
       .insert({
         partner_id: id,
-        customer_name: d.customer_name || null,
-        room_number: d.room_number || null,
+        customer_name: d.customer_name,
+        room_number: d.room_number,
         booking_amount: d.booking_amount,
         commission_amount: d.commission_amount,
         commission_status: d.commission_status,
         payment_mode: d.payment_mode,
-        notes: d.notes || null,
+        notes: d.notes,
         entered_by: enteredBy,
         paid_at: d.commission_status === 'Paid' ? new Date().toISOString() : null,
       })

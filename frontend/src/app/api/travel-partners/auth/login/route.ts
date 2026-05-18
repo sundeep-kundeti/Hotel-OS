@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { loginSchema } from '../../../../../features/travel-partners/schemas/travelPartner.schemas';
 
 export const runtime = 'edge';
 
@@ -21,12 +20,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const parsed = loginSchema.safeParse(body);
-    if (!parsed.success) {
+    const username = String(body.username || '').trim();
+    const password = String(body.password || '');
+    if (!username || !password) {
       return NextResponse.json({ error: 'Invalid credentials format' }, { status: 400 });
     }
-
-    const { username, password } = parsed.data;
     const accounts = getStaffAccounts();
 
     if (!accounts[username] || accounts[username] !== password) {

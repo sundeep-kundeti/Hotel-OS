@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '../../../lib/supabaseServer';
-import { createPartnerSchema } from '../../../features/travel-partners/schemas/travelPartner.schemas';
-import { getTodayIST } from '../../../features/travel-partners/utils/normalize';
+import { getTodayIST, normalizePhoneNumber, normalizeVehicleNumber } from '../../../features/travel-partners/utils/normalize';
 
 export const runtime = 'edge';
 
@@ -37,15 +36,24 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const parsed = createPartnerSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: parsed.error.flatten() },
-        { status: 400 }
-      );
+    const phone = normalizePhoneNumber(String(body.phone_number || ''));
+    const vehicle = normalizeVehicleNumber(String(body.vehicle_number || ''));
+    if (!phone || phone.length !== 10) {
+      return NextResponse.json({ error: 'Valid 10-digit phone number is required' }, { status: 400 });
+    }
+    if (!vehicle || vehicle.length < 8) {
+      return NextResponse.json({ error: 'Valid vehicle number is required' }, { status: 400 });
     }
 
-    const data = parsed.data;
+    const data = {
+      phone_number: phone,
+      vehicle_number: vehicle,
+      driver_name: body.driver_name || null,
+      vehicle_make: body.vehicle_make || null,
+      lead_source: body.lead_source || 'Vehicle Number Seen',
+      partner_status: body.partner_status || 'Lead Only',
+      notes: body.notes || null,
+    };
 
     // Get logged-in staff username from cookie
     const cookieHeader = request.headers.get('cookie') || '';
@@ -63,11 +71,11 @@ export async function POST(request: NextRequest) {
       .insert({
         phone_number: data.phone_number,
         vehicle_number: data.vehicle_number,
-        driver_name: data.driver_name || null,
-        vehicle_make: data.vehicle_make || null,
+        driver_name: data.driver_name,
+        vehicle_make: data.vehicle_make,
         lead_source: data.lead_source,
         partner_status: data.partner_status,
-        notes: data.notes || null,
+        notes: data.notes,
         created_by: createdBy,
         is_active: true,
       })

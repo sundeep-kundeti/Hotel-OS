@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '../../../../lib/supabaseServer';
-import { updatePartnerSchema } from '../../../../features/travel-partners/schemas/travelPartner.schemas';
 
 export const runtime = 'edge';
 
@@ -62,17 +61,19 @@ export async function PATCH(
     const { id } = await params;
     const body = await request.json();
 
-    const parsed = updatePartnerSchema.safeParse(body);
-    if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'Validation failed', details: parsed.error.flatten() },
-        { status: 400 }
-      );
+    // Allow updating: partner_status, notes, driver_name, vehicle_make, is_active
+    const allowed = ['partner_status', 'notes', 'driver_name', 'vehicle_make', 'is_active', 'last_contacted_at'];
+    const updates: Record<string, any> = {};
+    for (const key of allowed) {
+      if (key in body) updates[key] = body[key];
+    }
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
     }
 
     const { data: partner, error } = await supabaseServer
       .from('travel_partners')
-      .update(parsed.data)
+      .update(updates)
       .eq('id', id)
       .select('*')
       .single();
