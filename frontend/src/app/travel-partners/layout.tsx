@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title: 'Travel Partner Tracker | Srimuni Hotels',
   description: 'Internal tool to track travel partners, commissions, and follow-ups for Srimuni Hotels.',

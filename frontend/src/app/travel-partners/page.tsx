@@ -1,5 +1,7 @@
 'use client';
 
+export const runtime = 'edge';
+
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { TravelPartner } from '../../features/travel-partners/types/travelPartner.types';
