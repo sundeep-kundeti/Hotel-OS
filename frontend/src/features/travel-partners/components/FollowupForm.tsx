@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { tpFetch } from '../../../lib/tpApi';
 import { contactMethodValues, responseStatusValues } from '../schemas/travelPartner.schemas';
 import { CreateFollowupFormValues } from '../types/travelPartner.types';
 
@@ -32,9 +33,8 @@ export default function FollowupForm({ partnerId, partnerName, onSuccess, onCanc
     setServerError('');
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/travel-partners/${partnerId}/followups`, {
+      const res = await tpFetch(`/tp-followups/${partnerId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contact_method: values.contact_method || undefined,
           response_status: values.response_status || undefined,

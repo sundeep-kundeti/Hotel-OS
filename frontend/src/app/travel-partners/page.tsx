@@ -12,6 +12,7 @@ import AddPartnerForm from '../../features/travel-partners/components/AddPartner
 import CommissionForm from '../../features/travel-partners/components/CommissionForm';
 import FollowupForm from '../../features/travel-partners/components/FollowupForm';
 import { normalizePhoneNumber, normalizeVehicleNumber } from '../../features/travel-partners/utils/normalize';
+import { tpFetch } from '../../lib/tpApi';
 
 type SearchState =
   | { status: 'idle' }
@@ -45,11 +46,10 @@ export default function TravelPartnersPage() {
   const handleSearch = useCallback(async (type: 'phone' | 'vehicle', value: string) => {
     setSearchState({ status: 'loading' });
     try {
-      const res = await fetch(`/api/travel-partners/search?type=${type}&value=${encodeURIComponent(value)}`);
+      const res = await tpFetch(`/tp-search?type=${type}&value=${encodeURIComponent(value)}`);
       const data = await res.json();
 
       if (!res.ok) {
-        // If tables don't exist yet, treat as not found so Add Partner form shows
         if (data.error?.includes('schema cache') || data.error?.includes('does not exist')) {
           setSearchState({ status: 'notfound', searchType: type, searchValue: value });
           return;

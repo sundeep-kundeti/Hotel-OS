@@ -4,6 +4,7 @@ export const runtime = 'edge';
 
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { tpFetch } from '../../../lib/tpApi';
 import { TravelPartner, CommissionEntry, FollowupLog, PartnerSummary } from '../../../features/travel-partners/types/travelPartner.types';
 import StatusBadge from '../../../features/travel-partners/components/StatusBadge';
 import CommissionHistoryTable from '../../../features/travel-partners/components/CommissionHistoryTable';
@@ -43,7 +44,7 @@ export default function PartnerProfilePage({ params }: { params: Promise<{ id: s
   }, [searchParams]);
 
   const fetchProfile = useCallback(async (partnerId: string) => {
-    const res = await fetch(`/api/travel-partners/${partnerId}`);
+    const res = await tpFetch(`/tp-partner/${partnerId}`);
     const data = await res.json();
     if (res.ok) {
       setPartner(data.partner);
@@ -54,7 +55,7 @@ export default function PartnerProfilePage({ params }: { params: Promise<{ id: s
 
   const fetchCommissions = useCallback(async (partnerId: string) => {
     setTabLoading(true);
-    const res = await fetch(`/api/travel-partners/${partnerId}/commissions`);
+    const res = await tpFetch(`/tp-commissions/${partnerId}`);
     const data = await res.json();
     if (res.ok) setCommissions(data.commissions);
     setTabLoading(false);
@@ -62,7 +63,7 @@ export default function PartnerProfilePage({ params }: { params: Promise<{ id: s
 
   const fetchFollowups = useCallback(async (partnerId: string) => {
     setTabLoading(true);
-    const res = await fetch(`/api/travel-partners/${partnerId}/followups`);
+    const res = await tpFetch(`/tp-followups/${partnerId}`);
     const data = await res.json();
     if (res.ok) setFollowups(data.followups);
     setTabLoading(false);
@@ -83,9 +84,8 @@ export default function PartnerProfilePage({ params }: { params: Promise<{ id: s
   async function handleStatusUpdate() {
     if (!id || !editStatus) return;
     setEditSaving(true);
-    await fetch(`/api/travel-partners/${id}`, {
+    await tpFetch(`/tp-partner/${id}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ partner_status: editStatus }),
     });
     await fetchProfile(id);

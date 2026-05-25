@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { tpFetch } from '../../../lib/tpApi';
 import { createPartnerSchema, partnerStatusValues, leadSourceValues } from '../schemas/travelPartner.schemas';
 import { CreatePartnerFormValues } from '../types/travelPartner.types';
 import { normalizePhoneNumber, normalizeVehicleNumber, formatVehicleNumber } from '../utils/normalize';
@@ -60,9 +61,8 @@ export default function AddPartnerForm({ prefillPhone, prefillVehicle, onSuccess
 
     setSubmitting(true);
     try {
-      const res = await fetch('/api/travel-partners', {
+      const res = await tpFetch('/tp-partners', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(parsed.data),
       });
       const data = await res.json();

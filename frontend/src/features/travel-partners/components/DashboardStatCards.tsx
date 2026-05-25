@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { DashboardStats } from '../types/travelPartner.types';
 import { formatCurrency } from '../utils/normalize';
+import { tpFetch } from '../../../lib/tpApi';
 
 const STAT_CONFIG = [
   {
@@ -40,7 +41,7 @@ export default function DashboardStatCards() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/travel-partners/stats')
+    tpFetch('/tp-stats')
       .then((r) => r.json())
       .then((data) => {
         if (!data.error) setStats(data);

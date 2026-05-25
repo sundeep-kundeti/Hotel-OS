@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { TravelPartner, CommissionEntry, ReportType } from '../../../features/travel-partners/types/travelPartner.types';
 import StatusBadge from '../../../features/travel-partners/components/StatusBadge';
 import { formatVehicleNumber, formatDateTime, formatCurrency } from '../../../features/travel-partners/utils/normalize';
+import { tpFetch } from '../../../lib/tpApi';
 
 const REPORT_TABS: { key: ReportType; label: string; icon: string }[] = [
   { key: 'today_leads', label: "Today's Leads", icon: '🚗' },
@@ -26,7 +27,7 @@ export default function ReportsPage() {
     setLoading(true);
     setData([]);
     try {
-      const res = await fetch(`/api/travel-partners/reports?type=${type}`);
+      const res = await tpFetch(`/tp-reports?type=${type}`);
       const json = await res.json();
       if (res.ok) setData(json.report || []);
     } catch {}
@@ -47,7 +48,7 @@ export default function ReportsPage() {
         ? 'today_leads'
         : 'all_partners';
 
-      const res = await fetch(`/api/travel-partners/export?type=${exportType}`);
+      const res = await tpFetch(`/tp-export?type=${exportType}`);
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { tpFetch } from '../../../lib/tpApi';
 import { commissionStatusValues, paymentModeValues } from '../schemas/travelPartner.schemas';
 import { CreateCommissionFormValues } from '../types/travelPartner.types';
 
@@ -48,9 +49,8 @@ export default function CommissionForm({ partnerId, partnerName, onSuccess, onCa
 
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/travel-partners/${partnerId}/commissions`, {
+      const res = await tpFetch(`/tp-commissions/${partnerId}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...values,
           booking_amount: values.booking_amount ? Number(values.booking_amount) : 0,
