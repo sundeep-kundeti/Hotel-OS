@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { fuFetch } from '../../../lib/fuApi';
 import { PageHeader } from './PageHeader';
 import { BookingControlBar } from './BookingControlBar';
 
@@ -36,7 +37,7 @@ export default function GuestFreshUpPage({ initialDate, isAuthenticated }: Guest
     const fetchRooms = async () => {
       setAvailabilityLoading(true);
       try {
-        const res = await fetch(`/api/fresh-up/availability?date=${selectedDate}&startTime=${selectedStartTime}&durationHours=${selectedDuration}&paxCount=${selectedPax}`);
+        const res = await fuFetch(`/fu-availability?date=${selectedDate}&startTime=${selectedStartTime}&durationHours=${selectedDuration}&paxCount=${selectedPax}`);
         const data = await res.json();
         setRooms(data.availableRooms || []);
       } catch (err) {
@@ -93,7 +94,7 @@ export default function GuestFreshUpPage({ initialDate, isAuthenticated }: Guest
         customer: values
       };
 
-      const res = await fetch('/api/fresh-up/bookings', {
+      const res = await fuFetch('/fu-bookings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

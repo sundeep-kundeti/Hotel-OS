@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { fuFetch } from '../../../../lib/fuApi';
 import { LogOut } from 'lucide-react';
 import { DashboardHeader } from './DashboardHeader';
 import { SummaryCardsRow } from './SummaryCardsRow';
@@ -40,7 +41,7 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
   useEffect(() => {
     const fetchLeads = async () => {
       try {
-        const res = await fetch('/api/whatsapp/leads');
+        const res = await fuFetch('/whatsapp-leads');
         if (res.ok) {
            const data = await res.json();
            setWhatsappLeads(data.leads || []);
@@ -54,7 +55,7 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
     const fetchManagerBookings = async () => {
       setLoadingBookings(true);
       try {
-        const res = await fetch(`/api/fresh-up/manager/bookings?date=${selectedDate}`);
+        const res = await fuFetch(`/fu-manager-bookings?date=${selectedDate}`);
         const data = await res.json();
         
         if (res.ok && data.bookings) {
@@ -183,7 +184,7 @@ export default function ManagerFreshUpDashboard({ initialDate }: { initialDate?:
     }
 
     try {
-      const res = await fetch('/api/fresh-up/manager/actions', {
+      const res = await fuFetch('/fu-manager-actions', {
          method: 'POST',
          headers: { 'Content-Type': 'application/json' },
          body: JSON.stringify({ bookingId: activeBooking.bookingId, action, payload })
