@@ -104,7 +104,7 @@ export type PartnerProfileResponse = {
 export type DashboardStats = {
   today_leads: number;
   today_commissions: number;
-  pending_commission_amount: number;
+  today_commission_amount: number;
   active_partners: number;
 };
 

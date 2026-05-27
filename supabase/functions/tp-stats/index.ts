@@ -49,22 +49,22 @@ Deno.serve(async (req) => {
     const [
       { count: todayLeads },
       { count: todayCommissions },
-      { data: pendingData },
+      { data: todayCommData },
       { count: activePartners },
     ] = await Promise.all([
       supabase.from('travel_partners').select('*', { count: 'exact', head: true }).gte('created_at', todayStart).lte('created_at', todayEnd),
       supabase.from('commission_entries').select('*', { count: 'exact', head: true }).gte('created_at', todayStart).lte('created_at', todayEnd),
-      supabase.from('commission_entries').select('commission_amount').eq('commission_status', 'Pending'),
+      supabase.from('commission_entries').select('commission_amount').gte('created_at', todayStart).lte('created_at', todayEnd),
       supabase.from('travel_partners').select('*', { count: 'exact', head: true }).eq('partner_status', 'Active Partner').eq('is_active', true),
     ]);
 
-    const pendingAmount = (pendingData || []).reduce((sum, r) => sum + (r.commission_amount || 0), 0);
+    const todayCommissionAmount = (todayCommData || []).reduce((sum, r) => sum + (r.commission_amount || 0), 0);
 
     return new Response(
       JSON.stringify({
         today_leads: todayLeads || 0,
         today_commissions: todayCommissions || 0,
-        pending_commission_amount: pendingAmount,
+        today_commission_amount: todayCommissionAmount,
         active_partners: activePartners || 0,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },

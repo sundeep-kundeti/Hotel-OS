@@ -8,30 +8,30 @@ import { tpFetch } from '../../../lib/tpApi';
 const STAT_CONFIG = [
   {
     key: 'today_leads' as keyof DashboardStats,
-    label: 'Today Leads',
+    label: "Today's Leads",
     icon: '🚗',
     gradient: 'from-blue-500 to-blue-600',
     format: (v: number) => v.toString(),
   },
   {
     key: 'today_commissions' as keyof DashboardStats,
-    label: 'Today Commissions',
+    label: "Today's Commissions",
     icon: '💰',
     gradient: 'from-violet-500 to-violet-600',
     format: (v: number) => v.toString(),
   },
   {
-    key: 'pending_commission_amount' as keyof DashboardStats,
-    label: 'Pending Commission',
-    icon: '⏳',
-    gradient: 'from-amber-500 to-orange-500',
+    key: 'today_commission_amount' as keyof DashboardStats,
+    label: "Today's Commission ₹",
+    icon: '📊',
+    gradient: 'from-emerald-500 to-teal-500',
     format: (v: number) => formatCurrency(v),
   },
   {
     key: 'active_partners' as keyof DashboardStats,
     label: 'Active Partners',
     icon: '✅',
-    gradient: 'from-emerald-500 to-teal-500',
+    gradient: 'from-amber-500 to-orange-500',
     format: (v: number) => v.toString(),
   },
 ];
