@@ -204,7 +204,11 @@ export default function PartnerProfilePage({ params }: { params: Promise<{ id: s
           </div>
 
           {tab === 'commissions' && (
-            <CommissionHistoryTable commissions={commissions} loading={tabLoading} />
+            <CommissionHistoryTable
+              commissions={commissions}
+              loading={tabLoading}
+              onMarkPaid={() => { if (id) { fetchCommissions(id); fetchProfile(id); } }}
+            />
           )}
           {tab === 'followups' && (
             <FollowupLogList followups={followups} loading={tabLoading} />

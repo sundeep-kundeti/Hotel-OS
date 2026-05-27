@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, content-type, x-tp-session',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, PATCH, OPTIONS',
 };
 
 function validateSession(req: Request): string | null {
@@ -32,10 +32,57 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Extract partner_id from URL: /functions/v1/tp-commissions/<partner_id>
+  // URL patterns:
+  //   GET/POST  /functions/v1/tp-commissions/<partner_id>
+  //   PATCH     /functions/v1/tp-commissions/<commission_id>?action=mark_paid
   const url = new URL(req.url);
   const pathParts = url.pathname.split('/').filter(Boolean);
-  const partnerId = pathParts[pathParts.length - 1];
+  const lastSegment = pathParts[pathParts.length - 1];
+
+  // PATCH: mark a specific commission as Paid
+  if (req.method === 'PATCH') {
+    const commissionId = lastSegment;
+    if (!commissionId || commissionId === 'tp-commissions') {
+      return new Response(JSON.stringify({ error: 'Commission ID required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const supabasePatch = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    );
+
+    try {
+      const body = await req.json().catch(() => ({}));
+      const paymentMode = body.payment_mode || 'Cash';
+
+      const { data: commission, error } = await supabasePatch
+        .from('commission_entries')
+        .update({
+          commission_status: 'Paid',
+          payment_mode: paymentMode,
+          paid_at: new Date().toISOString(),
+        })
+        .eq('id', commissionId)
+        .select('*')
+        .single();
+
+      if (error) throw error;
+
+      return new Response(JSON.stringify({ commission }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    } catch (err: any) {
+      return new Response(JSON.stringify({ error: err.message }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+  }
+
+  const partnerId = lastSegment;
 
   if (!partnerId || partnerId === 'tp-commissions') {
     return new Response(JSON.stringify({ error: 'Partner ID required' }), {
