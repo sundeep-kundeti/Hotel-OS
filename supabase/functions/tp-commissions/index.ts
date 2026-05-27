@@ -2,13 +2,13 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, content-type',
+  'Access-Control-Allow-Headers': 'authorization, content-type, x-tp-session',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
 };
 
 function validateSession(req: Request): string | null {
-  const auth = req.headers.get('authorization') || '';
-  const token = auth.replace('Bearer ', '').trim();
+  // Token travels in X-TP-Session (Authorization carries the Supabase anon key for gateway)
+  const token = (req.headers.get('x-tp-session') || '').trim();
   if (!token) return null;
   try {
     const decoded = JSON.parse(atob(token));
