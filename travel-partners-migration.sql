@@ -108,20 +108,15 @@ create index if not exists idx_followup_created_at
 -- ============================================================
 
 -- ============================================================
--- IMPORTANT: Disable Row Level Security (RLS)
--- Run this IMMEDIATELY after creating the tables if inserts fail.
--- By default Supabase enables RLS on all new tables, which blocks
--- the anon API key from inserting rows.
+-- Row Level Security — LOCK DOWN direct REST API access
+-- Service role key (used by all edge functions) bypasses RLS,
+-- so this does NOT affect any edge function behaviour.
+-- Anon/authenticated users get zero direct table access.
 -- ============================================================
 
-alter table travel_partners disable row level security;
-alter table commission_entries disable row level security;
-alter table followup_logs disable row level security;
+alter table travel_partners    enable row level security;
+alter table commission_entries enable row level security;
+alter table followup_logs      enable row level security;
 
--- ============================================================
--- OR: If you prefer to keep RLS enabled, use these policies instead:
--- ============================================================
-
--- CREATE POLICY "Allow all operations" ON travel_partners FOR ALL TO anon USING (true) WITH CHECK (true);
--- CREATE POLICY "Allow all operations" ON commission_entries FOR ALL TO anon USING (true) WITH CHECK (true);
--- CREATE POLICY "Allow all operations" ON followup_logs FOR ALL TO anon USING (true) WITH CHECK (true);
+-- No policies = deny-by-default for anon/authenticated roles.
+-- All data access is routed through edge functions (service role).
