@@ -37,7 +37,8 @@ export async function POST(request: NextRequest) {
 
     const response = NextResponse.json({ success: true, username });
     response.cookies.set('tp_session', sessionPayload, {
-      httpOnly: true,
+      // NOT httpOnly — the client must read this cookie via document.cookie
+      // to build the Authorization: Bearer header for direct Supabase edge function calls.
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
