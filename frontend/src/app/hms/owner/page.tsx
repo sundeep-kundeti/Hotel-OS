@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getHmsSession, hmsFetch, HMSSession } from '../../../../lib/hmsApi';
+import { getHmsSession, hmsFetch, HMSSession } from '@/lib/hmsApi';
 import Link from 'next/link';
 import { ArrowLeft, LayoutDashboard, ShieldAlert, Activity, RefreshCw } from 'lucide-react';
 

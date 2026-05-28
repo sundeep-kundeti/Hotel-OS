@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getHmsSession, HMSSession, hmsFetch } from '../../../lib/hmsApi';
+import { getHmsSession, HMSSession, hmsFetch } from '@/lib/hmsApi';
 import { Building2, CalendarRange, Sparkles, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 

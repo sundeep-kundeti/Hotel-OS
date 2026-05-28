@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { getHmsSession, hmsFetch, HMSSession } from '../../../../lib/hmsApi';
+import { getHmsSession, hmsFetch, HMSSession } from '@/lib/hmsApi';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CalendarDays, Clock3, DoorClosed, IndianRupee, Plus, Search, Building2, UserRound, ArrowRight, ShieldAlert } from 'lucide-react';

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { getHmsSession, hmsFetch } from '../../../../../lib/hmsApi';
+import { getHmsSession, hmsFetch } from '@/lib/hmsApi';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';

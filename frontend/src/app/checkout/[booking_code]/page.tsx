@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { hmsFetchPublic } from '../../../lib/hmsApi';
+import { hmsFetchPublic } from '@/lib/hmsApi';
 import { Building2, Sparkles, LogOut, CheckCircle2 } from 'lucide-react';
 
 export default function GuestCheckoutPage({ params }: { params: Promise<{ booking_code: string }> }) {
