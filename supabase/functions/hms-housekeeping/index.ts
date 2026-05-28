@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
       const { data: rooms, error } = await supabase
         .from('hms_rooms')
         .select('*')
-        .eq('status', 'Checkout Pending')
+        .in('status', ['Checkout Pending', 'Cleaning'])
         .order('room_number');
       if (error) throw error;
 
