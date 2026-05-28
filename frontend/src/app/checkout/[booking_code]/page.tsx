@@ -228,7 +228,7 @@ export default function GuestCheckoutPage({ params }: { params: Promise<{ bookin
                     key={star}
                     type="button"
                     onClick={() => setRating(star)}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all ${rating >= star ? 'bg-amber-100 text-amber-500 scale-110' : 'bg-slate-50 text-slate-300 hover:bg-slate-100'}`}
+                    className={`w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all ${typeof rating === 'number' && rating >= star ? 'bg-amber-100 text-amber-500 scale-110' : 'bg-slate-50 text-slate-300 hover:bg-slate-100'}`}
                   >
                     ★
                   </button>
