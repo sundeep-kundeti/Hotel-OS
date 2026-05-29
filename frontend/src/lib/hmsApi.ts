@@ -24,14 +24,39 @@ export type HMSSession = {
 };
 
 /**
- * Reads the `hms_session` cookie value (URL-decoded to fix base64 padding).
- * Must only be called in a browser context (client components).
+ * Reads the hms_session token from localStorage (primary) or cookie (fallback).
+ * localStorage is more reliable when the API is cross-origin (Supabase vs frontend domain).
  */
 export function getHmsSessionToken(): string | null {
-  if (typeof document === 'undefined') return null;
-  const match = document.cookie.match(/hms_session=([^;]+)/);
-  if (!match) return null;
-  return decodeURIComponent(match[1]);
+  if (typeof window === 'undefined') return null;
+  // Primary: localStorage (works cross-origin)
+  const ls = localStorage.getItem('hms_session');
+  if (ls) return ls;
+  // Fallback: cookie (same-origin only)
+  if (typeof document !== 'undefined') {
+    const match = document.cookie.match(/hms_session=([^;]+)/);
+    if (match) return decodeURIComponent(match[1]);
+  }
+  return null;
+}
+
+/**
+ * Saves the session token to localStorage so it survives cross-origin redirects.
+ */
+export function saveHmsSession(token: string): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('hms_session', token);
+  }
+}
+
+/**
+ * Clears the HMS session from localStorage and cookie.
+ */
+export function clearHmsSession(): void {
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem('hms_session');
+    document.cookie = 'hms_session=; Max-Age=0; Path=/';
+  }
 }
 
 /**

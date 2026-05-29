@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Building2 } from 'lucide-react';
+import { saveHmsSession } from '@/lib/hmsApi';
 
 export default function HMSLoginPage() {
   const router = useRouter();
@@ -47,7 +48,10 @@ export default function HMSLoginPage() {
         setError(data.error || 'Invalid credentials');
         return;
       }
-      
+
+      // Store token in localStorage so getHmsSession() works cross-origin
+      if (data.token) saveHmsSession(data.token);
+
       // Redirect to the integrated HMS home page where user can pick the module
       const params = new URLSearchParams(window.location.search);
       const from = params.get('from') || '/hms';

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getHmsSession, HMSSession, hmsFetch } from '@/lib/hmsApi';
+import { getHmsSession, HMSSession, hmsFetch, clearHmsSession } from '@/lib/hmsApi';
 import { Building2, CalendarRange, Sparkles, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 
@@ -63,7 +63,7 @@ export default function HMSHomePage() {
           </div>
           <button 
             onClick={() => {
-              document.cookie = "hms_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+              clearHmsSession();
               router.push('/hms/login');
             }}
             className="rounded-xl bg-white/10 px-4 py-2 text-sm font-medium hover:bg-white/20 transition-colors"
