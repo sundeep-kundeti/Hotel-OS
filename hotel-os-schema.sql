@@ -344,3 +344,94 @@ alter table hms_exceptions        enable row level security;
 --   where table_schema = 'public' and table_name like 'hms_%'
 --   order by table_name;
 -- ============================================================
+
+-- ============================================================
+-- SEED DATA — Default Staff Accounts
+-- Run once. Passwords are plain text for MVP.
+-- ============================================================
+insert into hms_staff (username, password_hash, name, role) values
+  ('owner',        'Owner@Srimuni2026',   'Hotel Owner',        'OWNER'),
+  ('manager',      'Manager@Srimuni2026', 'Front Desk Manager', 'MANAGER'),
+  ('housekeep1',   'House@Srimuni2026',   'Housekeeping Staff', 'HOUSEKEEPING')
+on conflict (username) do nothing;
+
+-- ============================================================
+-- SEED DATA — 62 Rooms across 6 Floors
+--
+-- Floor 1  : Rooms 101–110  Non-AC Standard  ₹900
+-- Floor 2  : Rooms 201–210  Non-AC Standard  ₹900
+-- Floor 3  : Rooms 301–310  Non-AC Standard  ₹900
+-- Floor 4  : Rooms 401–412  AC Standard      ₹1400
+-- Floor 5  : Rooms 501–512  AC Standard      ₹1400
+-- Floor 6  : Rooms 601–608  Deluxe AC        ₹2000
+-- ============================================================
+insert into hms_rooms (room_number, room_type, floor, base_rate, status) values
+  -- Floor 1 Non-AC
+  ('101', 'Non-AC', 1, 900,  'Vacant Clean'),
+  ('102', 'Non-AC', 1, 900,  'Vacant Clean'),
+  ('103', 'Non-AC', 1, 900,  'Vacant Clean'),
+  ('104', 'Non-AC', 1, 900,  'Vacant Clean'),
+  ('105', 'Non-AC', 1, 900,  'Vacant Clean'),
+  ('106', 'Non-AC', 1, 900,  'Vacant Clean'),
+  ('107', 'Non-AC', 1, 900,  'Vacant Clean'),
+  ('108', 'Non-AC', 1, 900,  'Vacant Clean'),
+  ('109', 'Non-AC', 1, 900,  'Vacant Clean'),
+  ('110', 'Non-AC', 1, 900,  'Vacant Clean'),
+  -- Floor 2 Non-AC
+  ('201', 'Non-AC', 2, 900,  'Vacant Clean'),
+  ('202', 'Non-AC', 2, 900,  'Vacant Clean'),
+  ('203', 'Non-AC', 2, 900,  'Vacant Clean'),
+  ('204', 'Non-AC', 2, 900,  'Vacant Clean'),
+  ('205', 'Non-AC', 2, 900,  'Vacant Clean'),
+  ('206', 'Non-AC', 2, 900,  'Vacant Clean'),
+  ('207', 'Non-AC', 2, 900,  'Vacant Clean'),
+  ('208', 'Non-AC', 2, 900,  'Vacant Clean'),
+  ('209', 'Non-AC', 2, 900,  'Vacant Clean'),
+  ('210', 'Non-AC', 2, 900,  'Vacant Clean'),
+  -- Floor 3 Non-AC
+  ('301', 'Non-AC', 3, 900,  'Vacant Clean'),
+  ('302', 'Non-AC', 3, 900,  'Vacant Clean'),
+  ('303', 'Non-AC', 3, 900,  'Vacant Clean'),
+  ('304', 'Non-AC', 3, 900,  'Vacant Clean'),
+  ('305', 'Non-AC', 3, 900,  'Vacant Clean'),
+  ('306', 'Non-AC', 3, 900,  'Vacant Clean'),
+  ('307', 'Non-AC', 3, 900,  'Vacant Clean'),
+  ('308', 'Non-AC', 3, 900,  'Vacant Clean'),
+  ('309', 'Non-AC', 3, 900,  'Vacant Clean'),
+  ('310', 'Non-AC', 3, 900,  'Vacant Clean'),
+  -- Floor 4 AC
+  ('401', 'AC', 4, 1400, 'Vacant Clean'),
+  ('402', 'AC', 4, 1400, 'Vacant Clean'),
+  ('403', 'AC', 4, 1400, 'Vacant Clean'),
+  ('404', 'AC', 4, 1400, 'Vacant Clean'),
+  ('405', 'AC', 4, 1400, 'Vacant Clean'),
+  ('406', 'AC', 4, 1400, 'Vacant Clean'),
+  ('407', 'AC', 4, 1400, 'Vacant Clean'),
+  ('408', 'AC', 4, 1400, 'Vacant Clean'),
+  ('409', 'AC', 4, 1400, 'Vacant Clean'),
+  ('410', 'AC', 4, 1400, 'Vacant Clean'),
+  ('411', 'AC', 4, 1400, 'Vacant Clean'),
+  ('412', 'AC', 4, 1400, 'Vacant Clean'),
+  -- Floor 5 AC
+  ('501', 'AC', 5, 1400, 'Vacant Clean'),
+  ('502', 'AC', 5, 1400, 'Vacant Clean'),
+  ('503', 'AC', 5, 1400, 'Vacant Clean'),
+  ('504', 'AC', 5, 1400, 'Vacant Clean'),
+  ('505', 'AC', 5, 1400, 'Vacant Clean'),
+  ('506', 'AC', 5, 1400, 'Vacant Clean'),
+  ('507', 'AC', 5, 1400, 'Vacant Clean'),
+  ('508', 'AC', 5, 1400, 'Vacant Clean'),
+  ('509', 'AC', 5, 1400, 'Vacant Clean'),
+  ('510', 'AC', 5, 1400, 'Vacant Clean'),
+  ('511', 'AC', 5, 1400, 'Vacant Clean'),
+  ('512', 'AC', 5, 1400, 'Vacant Clean'),
+  -- Floor 6 Deluxe AC
+  ('601', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
+  ('602', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
+  ('603', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
+  ('604', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
+  ('605', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
+  ('606', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
+  ('607', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
+  ('608', 'Deluxe AC', 6, 2000, 'Vacant Clean')
+on conflict (room_number) do nothing;
