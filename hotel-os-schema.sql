@@ -25,7 +25,7 @@ create table if not exists hms_staff (
 create table if not exists hms_rooms (
   id uuid primary key default gen_random_uuid(),
   room_number text unique not null,
-  room_type text not null,          -- Standard | Deluxe | AC | Non-AC
+  room_type text not null,          -- Non-AC | AC | Deluxe AC
   floor integer not null,
   base_rate numeric not null default 0,
   status text not null default 'Vacant Clean',
@@ -217,114 +217,14 @@ create index if not exists idx_hms_exceptions_risk on hms_exceptions(risk_level)
 create index if not exists idx_hms_exceptions_type_booking on hms_exceptions(exception_type, booking_id);
 
 -- ============================================================
--- 9. SEQUENCES (for human-readable codes)
+-- 10. SEQUENCES (for human-readable codes)
 -- ============================================================
 create sequence if not exists hms_booking_seq start 1;
 create sequence if not exists hms_reward_seq start 1;
 create sequence if not exists hms_cleaning_seq start 1;
 
 -- ============================================================
--- 10. SEED: 62 ROOMS across 6 floors
--- ============================================================
--- Floor 1: Rooms 101–107 | Rate ₹1800 | Standard AC
-insert into hms_rooms (room_number, room_type, floor, base_rate, status) values
-  ('101','Standard AC',1,1800,'Vacant Clean'),
-  ('102','Standard AC',1,1800,'Vacant Clean'),
-  ('103','Standard AC',1,1800,'Vacant Clean'),
-  ('104','Standard AC',1,1800,'Vacant Clean'),
-  ('105','Standard AC',1,1800,'Vacant Clean'),
-  ('106','Standard AC',1,1800,'Vacant Clean'),
-  ('107','Standard AC',1,1800,'Vacant Clean')
-on conflict (room_number) do nothing;
-
--- Floor 2: Rooms 201–211 | Rate ₹2200 | Deluxe AC
-insert into hms_rooms (room_number, room_type, floor, base_rate, status) values
-  ('201','Deluxe AC',2,2200,'Vacant Clean'),
-  ('202','Deluxe AC',2,2200,'Vacant Clean'),
-  ('203','Deluxe AC',2,2200,'Vacant Clean'),
-  ('204','Deluxe AC',2,2200,'Vacant Clean'),
-  ('205','Deluxe AC',2,2200,'Vacant Clean'),
-  ('206','Deluxe AC',2,2200,'Vacant Clean'),
-  ('207','Deluxe AC',2,2200,'Vacant Clean'),
-  ('208','Deluxe AC',2,2200,'Vacant Clean'),
-  ('209','Deluxe AC',2,2200,'Vacant Clean'),
-  ('210','Deluxe AC',2,2200,'Vacant Clean'),
-  ('211','Deluxe AC',2,2200,'Vacant Clean')
-on conflict (room_number) do nothing;
-
--- Floor 3: Rooms 301–311 | Rate ₹2200 | Deluxe AC
-insert into hms_rooms (room_number, room_type, floor, base_rate, status) values
-  ('301','Deluxe AC',3,2200,'Vacant Clean'),
-  ('302','Deluxe AC',3,2200,'Vacant Clean'),
-  ('303','Deluxe AC',3,2200,'Vacant Clean'),
-  ('304','Deluxe AC',3,2200,'Vacant Clean'),
-  ('305','Deluxe AC',3,2200,'Vacant Clean'),
-  ('306','Deluxe AC',3,2200,'Vacant Clean'),
-  ('307','Deluxe AC',3,2200,'Vacant Clean'),
-  ('308','Deluxe AC',3,2200,'Vacant Clean'),
-  ('309','Deluxe AC',3,2200,'Vacant Clean'),
-  ('310','Deluxe AC',3,2200,'Vacant Clean'),
-  ('311','Deluxe AC',3,2200,'Vacant Clean')
-on conflict (room_number) do nothing;
-
--- Floor 4: Rooms 401–411 | Rate ₹2500 | Premium AC
-insert into hms_rooms (room_number, room_type, floor, base_rate, status) values
-  ('401','Premium AC',4,2500,'Vacant Clean'),
-  ('402','Premium AC',4,2500,'Vacant Clean'),
-  ('403','Premium AC',4,2500,'Vacant Clean'),
-  ('404','Premium AC',4,2500,'Vacant Clean'),
-  ('405','Premium AC',4,2500,'Vacant Clean'),
-  ('406','Premium AC',4,2500,'Vacant Clean'),
-  ('407','Premium AC',4,2500,'Vacant Clean'),
-  ('408','Premium AC',4,2500,'Vacant Clean'),
-  ('409','Premium AC',4,2500,'Vacant Clean'),
-  ('410','Premium AC',4,2500,'Vacant Clean'),
-  ('411','Premium AC',4,2500,'Vacant Clean')
-on conflict (room_number) do nothing;
-
--- Floor 5: Rooms 501–511 | Rate ₹2500 | Premium AC
-insert into hms_rooms (room_number, room_type, floor, base_rate, status) values
-  ('501','Premium AC',5,2500,'Vacant Clean'),
-  ('502','Premium AC',5,2500,'Vacant Clean'),
-  ('503','Premium AC',5,2500,'Vacant Clean'),
-  ('504','Premium AC',5,2500,'Vacant Clean'),
-  ('505','Premium AC',5,2500,'Vacant Clean'),
-  ('506','Premium AC',5,2500,'Vacant Clean'),
-  ('507','Premium AC',5,2500,'Vacant Clean'),
-  ('508','Premium AC',5,2500,'Vacant Clean'),
-  ('509','Premium AC',5,2500,'Vacant Clean'),
-  ('510','Premium AC',5,2500,'Vacant Clean'),
-  ('511','Premium AC',5,2500,'Vacant Clean')
-on conflict (room_number) do nothing;
-
--- Floor 6: Rooms 601–611 | Rate ₹3000 | Suite AC
-insert into hms_rooms (room_number, room_type, floor, base_rate, status) values
-  ('601','Suite AC',6,3000,'Vacant Clean'),
-  ('602','Suite AC',6,3000,'Vacant Clean'),
-  ('603','Suite AC',6,3000,'Vacant Clean'),
-  ('604','Suite AC',6,3000,'Vacant Clean'),
-  ('605','Suite AC',6,3000,'Vacant Clean'),
-  ('606','Suite AC',6,3000,'Vacant Clean'),
-  ('607','Suite AC',6,3000,'Vacant Clean'),
-  ('608','Suite AC',6,3000,'Vacant Clean'),
-  ('609','Suite AC',6,3000,'Vacant Clean'),
-  ('610','Suite AC',6,3000,'Vacant Clean'),
-  ('611','Suite AC',6,3000,'Vacant Clean')
-on conflict (room_number) do nothing;
-
--- ============================================================
--- 11. SEED: DEFAULT STAFF ACCOUNTS
--- Passwords stored as plain text for MVP (same as TP system)
--- Change these immediately after first login!
--- ============================================================
-insert into hms_staff (username, password_hash, name, role) values
-  ('owner',      'Owner@Srimuni2026',    'Hotel Owner',   'OWNER'),
-  ('manager',    'Manager@Srimuni2026',  'Front Desk Manager', 'MANAGER'),
-  ('housekeep1', 'House@Srimuni2026',    'Housekeeping Staff', 'HOUSEKEEPING')
-on conflict (username) do nothing;
-
--- ============================================================
--- 12. ROW LEVEL SECURITY — all access via service role only
+-- 11. ROW LEVEL SECURITY — all access via service role only
 -- ============================================================
 alter table hms_staff             enable row level security;
 alter table hms_rooms             enable row level security;
@@ -339,99 +239,199 @@ alter table hms_exceptions        enable row level security;
 -- Service role (edge functions) bypasses RLS
 
 -- ============================================================
--- DONE. Verify with:
--- select table_name from information_schema.tables
---   where table_schema = 'public' and table_name like 'hms_%'
---   order by table_name;
+-- 12. PRICING COLUMNS — add to hms_rooms (safe to re-run)
 -- ============================================================
+alter table hms_rooms
+  add column if not exists max_rate                    numeric not null default 1600,
+  add column if not exists is_ac                       boolean default false,
+  add column if not exists is_deluxe                   boolean default false,
+  add column if not exists luxury_addon_available      boolean default true,
+  add column if not exists extra_amenities_available   boolean default true;
 
 -- ============================================================
--- SEED DATA — Default Staff Accounts
--- Run once. Passwords are plain text for MVP.
+-- 13. SEED DATA — Default Staff Accounts
+-- Passwords stored as plain text for MVP. Change after first login.
 -- ============================================================
 insert into hms_staff (username, password_hash, name, role) values
-  ('owner',        'Owner@Srimuni2026',   'Hotel Owner',        'OWNER'),
-  ('manager',      'Manager@Srimuni2026', 'Front Desk Manager', 'MANAGER'),
-  ('housekeep1',   'House@Srimuni2026',   'Housekeeping Staff', 'HOUSEKEEPING')
+  ('owner',      'Owner@Srimuni2026',   'Hotel Owner',        'OWNER'),
+  ('manager',    'Manager@Srimuni2026', 'Front Desk Manager', 'MANAGER'),
+  ('housekeep1', 'House@Srimuni2026',   'Housekeeping Staff', 'HOUSEKEEPING')
 on conflict (username) do nothing;
 
+
 -- ============================================================
--- SEED DATA — 62 Rooms across 6 Floors
+-- SEED DATA — 61 Rooms (Srimuni Hotels — Final Layout)
 --
--- Floor 1  : Rooms 101–110  Non-AC Standard  ₹900
--- Floor 2  : Rooms 201–210  Non-AC Standard  ₹900
--- Floor 3  : Rooms 301–310  Non-AC Standard  ₹900
--- Floor 4  : Rooms 401–412  AC Standard      ₹1400
--- Floor 5  : Rooms 501–512  AC Standard      ₹1400
--- Floor 6  : Rooms 601–608  Deluxe AC        ₹2000
+-- Room classification:
+--   AC (₹1200–₹2200)   : 201–210, 608
+--   Deluxe AC (₹2500)  : 211, 311, 411, 511
+--   Non-AC (₹900–₹1600): 101–107, 301–310, 401–410, 501–510, 601–610 (excl 608)
+--
+-- Floor 1 : 101–107  (7 rooms)  Non-AC
+-- Floor 2 : 201–210  (10 rooms) AC  +  211 (1 room) Deluxe AC
+-- Floor 3 : 301–310  (10 rooms) Non-AC  +  311 (1 room) Deluxe AC
+-- Floor 4 : 401–410  (10 rooms) Non-AC  +  411 (1 room) Deluxe AC
+-- Floor 5 : 501–510  (10 rooms) Non-AC  +  511 (1 room) Deluxe AC
+-- Floor 6 : 601–607, 609–610 (9 rooms) Non-AC  +  608 (1 room) AC
+-- Total   : 7 + 11 + 11 + 11 + 11 + 10 = 61 rooms
 -- ============================================================
-insert into hms_rooms (room_number, room_type, floor, base_rate, status) values
-  -- Floor 1 Non-AC
-  ('101', 'Non-AC', 1, 900,  'Vacant Clean'),
-  ('102', 'Non-AC', 1, 900,  'Vacant Clean'),
-  ('103', 'Non-AC', 1, 900,  'Vacant Clean'),
-  ('104', 'Non-AC', 1, 900,  'Vacant Clean'),
-  ('105', 'Non-AC', 1, 900,  'Vacant Clean'),
-  ('106', 'Non-AC', 1, 900,  'Vacant Clean'),
-  ('107', 'Non-AC', 1, 900,  'Vacant Clean'),
-  ('108', 'Non-AC', 1, 900,  'Vacant Clean'),
-  ('109', 'Non-AC', 1, 900,  'Vacant Clean'),
-  ('110', 'Non-AC', 1, 900,  'Vacant Clean'),
-  -- Floor 2 Non-AC
-  ('201', 'Non-AC', 2, 900,  'Vacant Clean'),
-  ('202', 'Non-AC', 2, 900,  'Vacant Clean'),
-  ('203', 'Non-AC', 2, 900,  'Vacant Clean'),
-  ('204', 'Non-AC', 2, 900,  'Vacant Clean'),
-  ('205', 'Non-AC', 2, 900,  'Vacant Clean'),
-  ('206', 'Non-AC', 2, 900,  'Vacant Clean'),
-  ('207', 'Non-AC', 2, 900,  'Vacant Clean'),
-  ('208', 'Non-AC', 2, 900,  'Vacant Clean'),
-  ('209', 'Non-AC', 2, 900,  'Vacant Clean'),
-  ('210', 'Non-AC', 2, 900,  'Vacant Clean'),
-  -- Floor 3 Non-AC
-  ('301', 'Non-AC', 3, 900,  'Vacant Clean'),
-  ('302', 'Non-AC', 3, 900,  'Vacant Clean'),
-  ('303', 'Non-AC', 3, 900,  'Vacant Clean'),
-  ('304', 'Non-AC', 3, 900,  'Vacant Clean'),
-  ('305', 'Non-AC', 3, 900,  'Vacant Clean'),
-  ('306', 'Non-AC', 3, 900,  'Vacant Clean'),
-  ('307', 'Non-AC', 3, 900,  'Vacant Clean'),
-  ('308', 'Non-AC', 3, 900,  'Vacant Clean'),
-  ('309', 'Non-AC', 3, 900,  'Vacant Clean'),
-  ('310', 'Non-AC', 3, 900,  'Vacant Clean'),
-  -- Floor 4 AC
-  ('401', 'AC', 4, 1400, 'Vacant Clean'),
-  ('402', 'AC', 4, 1400, 'Vacant Clean'),
-  ('403', 'AC', 4, 1400, 'Vacant Clean'),
-  ('404', 'AC', 4, 1400, 'Vacant Clean'),
-  ('405', 'AC', 4, 1400, 'Vacant Clean'),
-  ('406', 'AC', 4, 1400, 'Vacant Clean'),
-  ('407', 'AC', 4, 1400, 'Vacant Clean'),
-  ('408', 'AC', 4, 1400, 'Vacant Clean'),
-  ('409', 'AC', 4, 1400, 'Vacant Clean'),
-  ('410', 'AC', 4, 1400, 'Vacant Clean'),
-  ('411', 'AC', 4, 1400, 'Vacant Clean'),
-  ('412', 'AC', 4, 1400, 'Vacant Clean'),
-  -- Floor 5 AC
-  ('501', 'AC', 5, 1400, 'Vacant Clean'),
-  ('502', 'AC', 5, 1400, 'Vacant Clean'),
-  ('503', 'AC', 5, 1400, 'Vacant Clean'),
-  ('504', 'AC', 5, 1400, 'Vacant Clean'),
-  ('505', 'AC', 5, 1400, 'Vacant Clean'),
-  ('506', 'AC', 5, 1400, 'Vacant Clean'),
-  ('507', 'AC', 5, 1400, 'Vacant Clean'),
-  ('508', 'AC', 5, 1400, 'Vacant Clean'),
-  ('509', 'AC', 5, 1400, 'Vacant Clean'),
-  ('510', 'AC', 5, 1400, 'Vacant Clean'),
-  ('511', 'AC', 5, 1400, 'Vacant Clean'),
-  ('512', 'AC', 5, 1400, 'Vacant Clean'),
-  -- Floor 6 Deluxe AC
-  ('601', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
-  ('602', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
-  ('603', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
-  ('604', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
-  ('605', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
-  ('606', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
-  ('607', 'Deluxe AC', 6, 2000, 'Vacant Clean'),
-  ('608', 'Deluxe AC', 6, 2000, 'Vacant Clean')
+insert into hms_rooms (room_number, room_type, floor, base_rate, max_rate, is_ac, is_deluxe, status) values
+  -- ── Floor 1 Non-AC (101–107) ────────────────────────────────
+  ('101', 'Non-AC', 1,  900, 1600, false, false, 'Vacant Clean'),
+  ('102', 'Non-AC', 1,  900, 1600, false, false, 'Vacant Clean'),
+  ('103', 'Non-AC', 1,  900, 1600, false, false, 'Vacant Clean'),
+  ('104', 'Non-AC', 1,  900, 1600, false, false, 'Vacant Clean'),
+  ('105', 'Non-AC', 1,  900, 1600, false, false, 'Vacant Clean'),
+  ('106', 'Non-AC', 1,  900, 1600, false, false, 'Vacant Clean'),
+  ('107', 'Non-AC', 1,  900, 1600, false, false, 'Vacant Clean'),
+  -- ── Floor 2 AC (201–210) + Deluxe (211) ────────────────────
+  ('201', 'AC',        2, 1200, 2200, true,  false, 'Vacant Clean'),
+  ('202', 'AC',        2, 1200, 2200, true,  false, 'Vacant Clean'),
+  ('203', 'AC',        2, 1200, 2200, true,  false, 'Vacant Clean'),
+  ('204', 'AC',        2, 1200, 2200, true,  false, 'Vacant Clean'),
+  ('205', 'AC',        2, 1200, 2200, true,  false, 'Vacant Clean'),
+  ('206', 'AC',        2, 1200, 2200, true,  false, 'Vacant Clean'),
+  ('207', 'AC',        2, 1200, 2200, true,  false, 'Vacant Clean'),
+  ('208', 'AC',        2, 1200, 2200, true,  false, 'Vacant Clean'),
+  ('209', 'AC',        2, 1200, 2200, true,  false, 'Vacant Clean'),
+  ('210', 'AC',        2, 1200, 2200, true,  false, 'Vacant Clean'),
+  ('211', 'Deluxe AC', 2, 2500, 2500, true,  true,  'Vacant Clean'),
+  -- ── Floor 3 Non-AC (301–310) + Deluxe (311) ────────────────
+  ('301', 'Non-AC',    3,  900, 1600, false, false, 'Vacant Clean'),
+  ('302', 'Non-AC',    3,  900, 1600, false, false, 'Vacant Clean'),
+  ('303', 'Non-AC',    3,  900, 1600, false, false, 'Vacant Clean'),
+  ('304', 'Non-AC',    3,  900, 1600, false, false, 'Vacant Clean'),
+  ('305', 'Non-AC',    3,  900, 1600, false, false, 'Vacant Clean'),
+  ('306', 'Non-AC',    3,  900, 1600, false, false, 'Vacant Clean'),
+  ('307', 'Non-AC',    3,  900, 1600, false, false, 'Vacant Clean'),
+  ('308', 'Non-AC',    3,  900, 1600, false, false, 'Vacant Clean'),
+  ('309', 'Non-AC',    3,  900, 1600, false, false, 'Vacant Clean'),
+  ('310', 'Non-AC',    3,  900, 1600, false, false, 'Vacant Clean'),
+  ('311', 'Deluxe AC', 3, 2500, 2500, true,  true,  'Vacant Clean'),
+  -- ── Floor 4 Non-AC (401–410) + Deluxe (411) ────────────────
+  ('401', 'Non-AC',    4,  900, 1600, false, false, 'Vacant Clean'),
+  ('402', 'Non-AC',    4,  900, 1600, false, false, 'Vacant Clean'),
+  ('403', 'Non-AC',    4,  900, 1600, false, false, 'Vacant Clean'),
+  ('404', 'Non-AC',    4,  900, 1600, false, false, 'Vacant Clean'),
+  ('405', 'Non-AC',    4,  900, 1600, false, false, 'Vacant Clean'),
+  ('406', 'Non-AC',    4,  900, 1600, false, false, 'Vacant Clean'),
+  ('407', 'Non-AC',    4,  900, 1600, false, false, 'Vacant Clean'),
+  ('408', 'Non-AC',    4,  900, 1600, false, false, 'Vacant Clean'),
+  ('409', 'Non-AC',    4,  900, 1600, false, false, 'Vacant Clean'),
+  ('410', 'Non-AC',    4,  900, 1600, false, false, 'Vacant Clean'),
+  ('411', 'Deluxe AC', 4, 2500, 2500, true,  true,  'Vacant Clean'),
+  -- ── Floor 5 Non-AC (501–510) + Deluxe (511) ────────────────
+  ('501', 'Non-AC',    5,  900, 1600, false, false, 'Vacant Clean'),
+  ('502', 'Non-AC',    5,  900, 1600, false, false, 'Vacant Clean'),
+  ('503', 'Non-AC',    5,  900, 1600, false, false, 'Vacant Clean'),
+  ('504', 'Non-AC',    5,  900, 1600, false, false, 'Vacant Clean'),
+  ('505', 'Non-AC',    5,  900, 1600, false, false, 'Vacant Clean'),
+  ('506', 'Non-AC',    5,  900, 1600, false, false, 'Vacant Clean'),
+  ('507', 'Non-AC',    5,  900, 1600, false, false, 'Vacant Clean'),
+  ('508', 'Non-AC',    5,  900, 1600, false, false, 'Vacant Clean'),
+  ('509', 'Non-AC',    5,  900, 1600, false, false, 'Vacant Clean'),
+  ('510', 'Non-AC',    5,  900, 1600, false, false, 'Vacant Clean'),
+  ('511', 'Deluxe AC', 5, 2500, 2500, true,  true,  'Vacant Clean'),
+  -- ── Floor 6 Non-AC (601–607, 609–610) + AC (608) ────────────
+  ('601', 'Non-AC',    6,  900, 1600, false, false, 'Vacant Clean'),
+  ('602', 'Non-AC',    6,  900, 1600, false, false, 'Vacant Clean'),
+  ('603', 'Non-AC',    6,  900, 1600, false, false, 'Vacant Clean'),
+  ('604', 'Non-AC',    6,  900, 1600, false, false, 'Vacant Clean'),
+  ('605', 'Non-AC',    6,  900, 1600, false, false, 'Vacant Clean'),
+  ('606', 'Non-AC',    6,  900, 1600, false, false, 'Vacant Clean'),
+  ('607', 'Non-AC',    6,  900, 1600, false, false, 'Vacant Clean'),
+  ('608', 'AC',        6, 1200, 2200, true,  false, 'Vacant Clean'),
+  ('609', 'Non-AC',    6,  900, 1600, false, false, 'Vacant Clean'),
+  ('610', 'Non-AC',    6,  900, 1600, false, false, 'Vacant Clean')
 on conflict (room_number) do nothing;
+
+-- ============================================================
+-- MIGRATION — Correct existing rooms if already seeded
+-- Run this if hms_rooms already exists in the DB.
+-- Does NOT change room status.
+-- ============================================================
+
+-- Step 1: Reset all rooms to Non-AC base
+update hms_rooms set
+  room_type = 'Non-AC', base_rate = 900, max_rate = 1600,
+  is_ac = false, is_deluxe = false,
+  luxury_addon_available = true, extra_amenities_available = true;
+
+-- Step 2: Set AC rooms — 201–210 and 608
+update hms_rooms set
+  room_type = 'AC', base_rate = 1200, max_rate = 2200, is_ac = true, is_deluxe = false
+where room_number in ('201','202','203','204','205','206','207','208','209','210','608');
+
+-- Step 3: Set Deluxe AC rooms — 211, 311, 411, 511
+update hms_rooms set
+  room_type = 'Deluxe AC', base_rate = 2500, max_rate = 2500, is_ac = true, is_deluxe = true
+where room_number in ('211','311','411','511');
+
+
+-- ============================================================
+-- ADD-ON TABLES
+-- ============================================================
+
+-- Room-level add-on catalogue
+create table if not exists hms_room_addons (
+  id           uuid primary key default gen_random_uuid(),
+  addon_name   text not null,
+  addon_type   text not null,   -- AMENITY | LUXURY | COMFORT
+  price        numeric not null,
+  is_active    boolean default true,
+  created_at   timestamptz default now()
+);
+
+-- Per-booking add-on line items
+create table if not exists hms_booking_addons (
+  id           uuid primary key default gen_random_uuid(),
+  booking_id   uuid references hms_bookings(id) on delete cascade,
+  addon_id     uuid references hms_room_addons(id),
+  addon_name   text not null,
+  addon_price  numeric not null,
+  quantity     integer default 1,
+  total_price  numeric generated always as (addon_price * quantity) stored,
+  created_at   timestamptz default now()
+);
+
+create index if not exists idx_hms_booking_addons_booking_id on hms_booking_addons(booking_id);
+
+alter table hms_room_addons    enable row level security;
+alter table hms_booking_addons enable row level security;
+
+-- ============================================================
+-- SEED DATA — Add-on Catalogue
+-- ============================================================
+insert into hms_room_addons (addon_name, addon_type, price) values
+  ('Extra Pillow',       'COMFORT',  50),
+  ('Extra Bedsheet',     'COMFORT', 100),
+  ('Extra Mattress',     'COMFORT', 200),
+  ('Tea / Coffee Kit',   'AMENITY', 100),
+  ('Premium Towel Set',  'LUXURY',  150),
+  ('Luxury Toiletry Kit','LUXURY',  200),
+  ('Early Check-In',     'AMENITY', 300),
+  ('Late Checkout',      'AMENITY', 300)
+on conflict do nothing;
+
+-- ============================================================
+-- VERIFICATION QUERIES (run after migration)
+-- ============================================================
+-- 1. Count by type:
+-- select room_type, base_rate, max_rate, is_ac, is_deluxe, count(*)
+-- from hms_rooms
+-- group by room_type, base_rate, max_rate, is_ac, is_deluxe
+-- order by room_type;
+--
+-- Expected:
+--   AC         | 1200 | 2200 | true  | false | 11
+--   Deluxe AC  | 2500 | 2500 | true  | true  |  5
+--   Non-AC     |  900 | 1600 | false | false | 46 (or remaining)
+--
+-- 2. Spot-check specific rooms:
+-- select room_number, room_type, base_rate, max_rate, is_ac, is_deluxe
+-- from hms_rooms
+-- where room_number in ('201','211','311','411','511','611','608','101','301','401','501','601')
+-- order by room_number;
+-- ============================================================
+
+

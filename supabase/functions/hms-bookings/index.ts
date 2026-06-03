@@ -92,6 +92,18 @@ Deno.serve(async (req) => {
   const isRoot = !bookingCode || bookingCode === 'hms-bookings';
 
   try {
+    // ── GET /hms-bookings/addons  → add-on catalogue ─────────────────────────
+    if (req.method === 'GET' && bookingCode === 'addons') {
+      const { data, error } = await supabase
+        .from('hms_room_addons')
+        .select('*')
+        .eq('is_active', true)
+        .order('addon_type')
+        .order('price');
+      if (error) throw error;
+      return json({ addons: data });
+    }
+
     // ── GET /hms-bookings  → active stays ────────────────────────────────────
     if (req.method === 'GET' && isRoot) {
       const filter = url.searchParams.get('filter') || 'active';
@@ -132,7 +144,7 @@ Deno.serve(async (req) => {
       const body = await req.json();
       const { guest_name, guest_phone, room_id, source, checkin_expected, checkout_expected,
               amount, amount_collected, payment_mode, payment_status, remarks,
-              id_type, id_last4 } = body;
+              id_type, id_last4, addons: addonsList } = body;
 
       // Validate required fields
       if (!guest_name || !guest_phone || !room_id || !checkin_expected || !checkout_expected || !amount) {
@@ -204,6 +216,22 @@ Deno.serve(async (req) => {
         .single();
 
       if (bookingErr) throw bookingErr;
+
+      // Save add-on line items
+      if (Array.isArray(addonsList) && addonsList.length > 0) {
+        const addonRows = addonsList
+          .filter((a: any) => a.quantity > 0)
+          .map((a: any) => ({
+            booking_id: booking.id,
+            addon_id: a.addon_id,
+            addon_name: a.addon_name,
+            addon_price: a.addon_price,
+            quantity: a.quantity,
+          }));
+        if (addonRows.length > 0) {
+          await supabase.from('hms_booking_addons').insert(addonRows);
+        }
+      }
 
       // Update room status → Pending Check-In
       await supabase.from('hms_rooms').update({ status: 'Pending Check-In' }).eq('id', room_id);
